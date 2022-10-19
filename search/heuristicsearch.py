@@ -1,7 +1,7 @@
-#heuristicsearch.py
 from collections import defaultdict
 from math import inf
 from heapdict import heapdict
+
 def search(start, goal, edges, heuristic=lambda x: 0):
     """
     search finds the best path between the start and goal. If there is
@@ -22,6 +22,7 @@ def search(start, goal, edges, heuristic=lambda x: 0):
         If a heuristic is also consistent, search will find the optimal
         path without expanding a vertex more than once.
     """
+    
     # came_from: vertex -> previous vertex of best path to vertex
     came_from = dict()
     # path_cost: vertex -> sum of edge weights of best path to vertex
