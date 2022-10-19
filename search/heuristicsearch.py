@@ -1,95 +1,35 @@
-#a_star.py
-import queue.py # the one in example code
-def search(initial_node, goal_node, graph, heuristic):
+#heuristicsearch.py
+from collections import defaultdict
+from heapdict import heapdict
+from math import inf
+def search(start, goal, heuristic):
     """
-    finds the shortest path from initial_node to goal_node on graph
-    returns the shortest path, or returns None if there is no path
+    Finds the optimal path between initial_node and goal_node optimally given a heuristic.
     """
     
-    ## setup queue
-    open_nodes = MinHeap() # from queue.py
-    closed_nodes = []
-    previous_node = {}
+    came_from = dict()
+    path_cost = defaultdict(lambda : inf)
     
-    ## setup first node
-    open_nodes.insert(initial_node, heuristic(initial_node))
+    # Setup queue.
+    open_nodes = heapdict()
+    open_nodes[start_node] = 0
+    best_cost[start_node] = 0
     
     while open_nodes:
-        next_node = open_nodes.extract()
-        if next_node == goal_node:
-            break
-        for new_node, edge_weight in next_node.get_edges():
-            if new_node in closed_nodes:
-                continue
-            if new_node not in all_nodes:
-                all_nodes.append(new_node)
-                new_node_key += 1
-            new_node_key = all_nodes.index(new_node)
+        current, _ = open_nodes.popitem()
+        if current == goal:
+            # Start at the goal and traverse back to the start.
+            traversed = goal
+            path = [traversed]
+            while traversed != start:
+                traversed = came_from[traversed]
+                path = [traversed] + path
+            return path
+        for neighbor, edge_weight in current.neighbors():
+            cost_thru_current = best_cost[opened_node] + edge_weight 
+            if cost_thru_current < best_cost[neighbor]:
+                best_cost[neighbor] = cost_thru_current
+                open_nodes[neighbor] = best_cost[neighbor] + heuristic(neighbor)
     else:
         return None
-        
     
-    #the action matrix holds what action it took to get to that point on the map
-    action=[[-1 for row in map[0]] for col in map] 
-    dim=[len(map),len(map[0])]   #remember dimensions
-    # heuristic function is the distance from the goal without obstacles
-    heuristic=[[abs(goal[0]-i)+abs(goal[1]-j) for j in range(dim[1])]\
-    for i in range(dim[0])]
-    moves=[[-1,0],[0,-1],[1,0],[0,1]]  # possible moves from each point
-    closed[init[0]][init[1]]=True      # close the initial spot
-    g=0                                # g value of initial spot
-    f=g+heuristic[init[0]][init[1]]    # f value of initial spot
-    open=[[f,g,init[0],init[1]]]
-    done=False
-    while not done:
-        if len(open)==0:
-            done=True
-            return  #if open is empty return None
-        else:
-            # choose the box with the lowest f value then the lowest g val
-            open.sort()
-            bestF=open[0][0]
-            bestG=open[0][1]
-            for i in range(len(open)):
-                if open[i][0]==bestF:
-                    if open[i][1]<=bestG:
-                        index=i
-                        bestG=open[0][1]
-            expand=open[index]
-            f=expand[0]
-            g=expand[1]
-            x=expand[2]
-            y=expand[3]
-            open.remove(expand) # remove from open
-            
-            if goal[0]==x and goal[1]==y: #did we make it to the goal
-                done=True                     
-                minLen=g                   # the shortest path has that g value
-                break
-            ##
-            for m in range(len(moves)):  #expand all the possible moves
-                newX=x+moves[m][0]
-                newY=y+moves[m][1]
-                #check if within map
-                if newX>=0 and newX<dim[0] and newY>=0 and newY<dim[1]:
-                    if not closed[newX][newY]:  
-                        open.append([g+heuristic[newX][newY]+1,g+1,newX,newY])
-                        action[newX][newY]=m
-                        closed[newX][newY]=True
-    # create path backwards from action
-    pos=[goal[0],goal[1]] # start from the end
-    # path should be one longer than the number of moves
-    revPath=[[0,0] for i in range(minLen+1)] 
-    # initialize the first part of the path
-    revPath[0][0]=pos[0]
-    revPath[0][1]=pos[1]
-    for i in range(1,minLen+1):
-        if action[pos[0]][pos[1]]!=-1:
-            move=moves[action[pos[0]][pos[1]]]
-            #move backwards from last position
-            pos[0]-=move[0]
-            pos[1]-=move[1]
-        revPath[i][0]=pos[0]
-        revPath[i][1]=pos[1]
-    path=revPath[::-1]# reverse the path
-    return path # return path
