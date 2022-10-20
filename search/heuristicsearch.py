@@ -34,8 +34,7 @@ def search(start, goal, edges, heuristic=lambda x: 0):
     open_vertices[start] = 0
     path_cost[start] = 0
     
-    while open_vertices:
-        current, priority = open_vertices.popitem()
+    for current in open_vertices:
         if current == goal:
             # Start at the goal and traverse back to the start.
             traversed = goal
@@ -46,9 +45,9 @@ def search(start, goal, edges, heuristic=lambda x: 0):
             return path
         for neighbor, weight in edges(current):
             # current_cost is the distance to neighbor through current.
-            current_cost = path_cost[opened_node] + weight 
+            current_cost = path_cost[current] + weight 
             if current_cost < path_cost[neighbor]:
-                best_cost[neighbor] = current_cost
+                path_cost[neighbor] = current_cost
                 open_vertices[neighbor] = current_cost + heuristic(neighbor)
     else:
         # If the queue runs out of vertices, return no path.
