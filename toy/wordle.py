@@ -10,26 +10,31 @@ v3: will check each word and generate the pattern difference
 from string import ascii_lowercase as alphabet
 
 class Solver:
-    def __init__(self, target_list, dictionary, word_length=5, difficulty="disjoint"):
-        self.targets = target_list
-        self.dictionary = dictionary
+    def __init__(self, targets, guesses, word_length, difficulty="disjoint"):
+        """
+        targets: list of possible target words
+        guesses: list of possible guess words
+        word_length: word length to filter targets and guesses
+        difficulty: how strict do guesses need to be
+            disjoint = ignores any information from guesses and just eliminates any word with letters that have already been used in a guess.
+            normal = any guess is permissible. Only zero information guesses are eliminated.
+            hard = guess must
+        """
+        # Filter guesses to protect the algorithm
         self.word_length = word_length
+        self.targets = [word for word in targets if len(word)==word_length]
+        self.guesses = [word for word in guesses if len(world)==word_length]
     def __next__(self):
-        if not self.dictionary:
+        """
+        returns the next guess
+        """
+        # This allows disjoint to iterate through guesses
+        if not self.guesses:
             raise StopIteration
-        self.update_frequency()
-        max_score = 0
-        for guess in self.dictionary:
-            score = self.score_word(guess)
-            if score > max_score:
-                max_score = score
-                best_guess = guess
-        return best_guess
-    def score_word(self, guess):
-        return self._poss_prod(self.frequency[guess].values())
-    def update_frequency(self):
+            
+        # update frequency
         self.frequency = {}
-        for guess in self.dictionary:
+        for guess in self.guesses:
             self.frequency[guess] = {}
             for goal in self.targets:
                 pattern = self.compare_words(guess, goal)
@@ -38,23 +43,42 @@ class Solver:
                     self.frequency[guess][key] += 1
                 else:
                     self.frequency[guess][key] = 1
-        return self.frequency
+        
+    
+        max_score = 0
+        for guess in self.guesses:
+            score = self.score_word(guess)
+            if score > max_score:
+                max_score = score
+                best_guess = guess
+        return best_guess
+    def score_word(self, guess):
+        return self._poss_prod(self.frequency[guess].values())
     def compare_words(self, guess, target):
-        pattern = ["unknown"]*self.word_length
-        guess = list(guess)
-        target = list(target)
-        for guess_index in range(self.word_length):
-            if guess[guess_index] == target[guess_index]:
-                pattern[guess_index] = "exact"
-                target[guess_index] = None
-            elif guess[guess_index] in target:
-                for target_index in range(self.word_length):
-                    if guess[guess_index] == target[target_index]:
-                        pattern[guess_index] = "elsewhere"
-                        target[target_index] = None
-                        break
-            else:
-                pattern[guess_index] = "absent"
+        """
+        Compares a guess to a target word and returns information like Wordle.
+        returns a pattern string:
+            "exact": the guess and target letter match at that place
+            "elsewhere": the guess letter is in the target, but not at that place
+                It only sets this if the information from the target letter is not already used.
+            "absent": any guess letters that remain
+        """
+        # Setup initial pattern with the exact matches
+        pattern = ["exact" if x==y else "unknown" for x, y in zip(guess, target)]
+        # Remove letters from guess as elsewhere should remove them
+        target = [None if x=="exact" else y for x, y in zip(pattern, target)] 
+        # 
+        for guess_index, guess_letter in enumerate(guess):
+            if guess_letter not in target:
+                continue
+            for target_index, target_letter in enumerate(target):
+                if guess_letter == target_letter:
+                    pattern[guess_index] = "elsewhere"
+                    # break to eliminate only the first target_letter 
+                    target[target_index] = None
+                    break
+        # Convert remaining "unknown" to "absent".
+        pattern = ["absent" if x=="unknown" else x for x in pattern]
         return pattern
     def _letter_pattern2key(self, pattern):
         return sum([value*2**index for index, value in enumerate(reversed(pattern))])
@@ -62,8 +86,8 @@ class Solver:
         converter = {"unknown":0, "absent":1, "elsewhere":2, "exact":3}
         return sum([converter[value]*4**index for index, value in enumerate(pattern)])
     def _key2letter_pattern(self, key):
-        index=0
-        pattern=[False]*self.word_length
+        index = 0
+        pattern = [False] * self.word_length
         for i in range(self.word_length):
             pattern[i]=key%2==1
             key=key//2
