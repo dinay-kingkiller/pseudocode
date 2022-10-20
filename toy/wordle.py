@@ -6,7 +6,9 @@ v2: tested each letter and the pattern individually
 v3: will check each word and generate the pattern difference
 """
 
+import itertools
 
+from collections import defaultdict
 from string import ascii_lowercase as alphabet
 
 class Solver:
@@ -28,29 +30,28 @@ class Solver:
         """
         returns the next guess
         """
-        # This allows disjoint to iterate through guesses
+        # If no possible guesses, stop
         if not self.guesses:
             raise StopIteration
             
-        # update frequency
-        self.frequency = {}
+        # Update frequency
+        self.frequency = dict()
         for guess in self.guesses:
-            self.frequency[guess] = {}
+            self.frequency[guess] = defaultdict()
             for goal in self.targets:
                 pattern = self.compare_words(guess, goal)
-                key = self._guess_pattern2key(pattern)
-                if key in self.frequency[guess]:
-                    self.frequency[guess][key] += 1
-                else:
-                    self.frequency[guess][key] = 1
+                self.frequency[guess][pattern] += 1
         
-    
+        # Find the best guess.
         max_score = 0
         for guess in self.guesses:
-            score = self.score_word(guess)
+            pattern_scores = self.frequency[guess].values()
+            score = sum([x*y for x, y in itertools.product(pattern_scores, pattern_scores)])
+            score -= sum([x*x for x in pattern_scores])
             if score > max_score:
                 max_score = score
                 best_guess = guess
+                
         return best_guess
     def score_word(self, guess):
         return self._poss_prod(self.frequency[guess].values())
@@ -58,28 +59,35 @@ class Solver:
         """
         Compares a guess to a target word and returns information like Wordle.
         returns a pattern string:
-            "exact": the guess and target letter match at that place
-            "elsewhere": the guess letter is in the target, but not at that place
+            "e", exact: the guess and target letter match at that place
+            "l", elsewhere: the guess letter is in the target, but not at that place
                 It only sets this if the information from the target letter is not already used.
-            "absent": any guess letters that remain
+            "a", absent: any guess letters that remain
+            "u", unknown: not yet checked. used in this function only
         """
-        # Setup initial pattern with the exact matches
-        pattern = ["exact" if x==y else "unknown" for x, y in zip(guess, target)]
-        # Remove letters from guess as elsewhere should remove them
-        target = [None if x=="exact" else y for x, y in zip(pattern, target)] 
-        # 
+        # Setup initial pattern to "u"nkown.
+        pattern = ["u" for g in guess]
+        # Check for "e"xact matches.
+        for index, letter in enumerate(guess):
+            if letter == target[index]:
+                pattern[index] = "e"
+                target[index] = None
+        # Check for e"l"sewhere matches.
         for guess_index, guess_letter in enumerate(guess):
-            if guess_letter not in target:
+            if pattern[guess_index] != "u":
+                # Skip already known parts of the pattern.
                 continue
             for target_index, target_letter in enumerate(target):
                 if guess_letter == target_letter:
-                    pattern[guess_index] = "elsewhere"
+                    pattern[guess_index] = "l"
                     # break to eliminate only the first target_letter 
                     target[target_index] = None
                     break
-        # Convert remaining "unknown" to "absent".
-        pattern = ["absent" if x=="unknown" else x for x in pattern]
-        return pattern
+        # Convert remaining "u"nknown to "a"bsent.
+        for index, letter in enumerate(pattern):
+            if letter == "u":
+                pattern[index] = "a"
+        return "".join(pattern
     def _letter_pattern2key(self, pattern):
         return sum([value*2**index for index, value in enumerate(reversed(pattern))])
     def _guess_pattern2key(self, pattern):
