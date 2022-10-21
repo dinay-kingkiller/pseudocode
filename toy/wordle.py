@@ -90,17 +90,26 @@ class Solver:
                 pattern[index] = "a"
        
         return "".join(pattern)
-    def update_disjoint(self, clue):
+    def update_disjoint(self, clues):
         """
-        update_disjoit removes every word in guesses that has a letter in clue.
+        update_disjoint removes every word in guesses that has a letter in clues.
         """
         self.guesses = [word for word in self.guesses if all(letter not in clue for letter in word)]
-    def update_exact(self, clue):
-        self.targets = [word for word in self.targets if word[position]==letter for position, letter in clue]
+    def update_exact(self, clues):
+        self.targets = [word for word in self.targets if all(word[position]==letter for position, letter in clues]
         if difficulty == "normal":
-            return
+            pass
         if difficulty == "hard" or difficulty == "ultra":
-            self.guesses = [word for word in self.guesses if word[position]==letter for position, letter in clue]
+            self.guesses = [word for word in self.guesses if all(word[position]==letter for position, letter in clue)]
+    def update_elsewhere(self, clues):
+         """
+         The for the other update functions, the clues can be appended with each guess. For update_elsewhere, every 
+         """                                                     
+        return
+        self.targets = [word for word in self.targets if all(word[position]!=letter for position, letter in clue)]
+        self.targets = [word for word in self.targets if ]
+    def update_absent(self, clues):
+        pass
     def update(self, exact_clue, elsewhere_clue, absent_clue):
         for word in self.targets:
             self.validate_possible(word, exact_clue, elsewhere_clue, absent_clue)
