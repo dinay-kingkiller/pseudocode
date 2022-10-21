@@ -1,6 +1,17 @@
-def elect(ballots):
-    while ballots:
-        pass
+from collections import defaultdict
+
+
+def elect(ballot_box):
+    count = defaultdict(int)
+    while ballot_box:
+        for ballot in ballot_box:
+            for candidate in ballot:
+                if candidate in eliminated:
+                    continue
+                else:
+                    count[candidate] += 1
+            else:
+                pass
 class StrictRankedBallotBox(RankedBallotBox):
     def full_irv(self):
         ballots = self.ballots.copy()
