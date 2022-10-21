@@ -38,7 +38,7 @@ class Solver:
         # Calculate pattern frequency.
         frequency = dict()
         for guess in self.guesses:
-            frequency[guess] = defaultdict()
+            frequency[guess] = defaultdict(int())
             for goal in self.targets:
                 pattern = self.compare_words(guess, goal)
                 frequency[guess][pattern] += 1
@@ -95,22 +95,15 @@ class Solver:
         update_disjoint removes every word in guesses that has a letter in clues.
         """
         self.guesses = [word for word in self.guesses if all(letter not in clue for letter in word)]
-    def update_exact(self, clues):
-        self.targets = [word for word in self.targets if all(word[position]==letter for position, letter in clues]
-        if difficulty == "normal":
-            pass
-        if difficulty == "hard" or difficulty == "ultra":
-            self.guesses = [word for word in self.guesses if all(word[position]==letter for position, letter in clue)]
-    def update_elsewhere(self, clues):
-         """
-         The for the other update functions, the clues can be appended with each guess. For update_elsewhere, every 
-         """                                                     
-        return
-        self.targets = [word for word in self.targets if all(word[position]!=letter for position, letter in clue)]
-        self.targets = [word for word in self.targets if ]
-    def update_absent(self, clues):
-        pass
-    def update(self, exact_clue, elsewhere_clue, absent_clue):
+    def update(self, clue):
+        """
+        Update targets and guesses based on the given clue.
+        clue is an iterable of tuples: (letter, state)
+        State can either be "exact", "elsewhere", or "absent".
+        """
+        for letter, state in clue:
+            if state == "exact":
+               
         for word in self.targets:
             self.validate_possible(word, exact_clue, elsewhere_clue, absent_clue)
         for word in self.guesses:
