@@ -12,35 +12,36 @@ from collections import defaultdict
 from string import ascii_lowercase as alphabet
 
 class Solver:
-    def __init__(self, targets, guesses, word_length, difficulty="disjoint"):
+    def __init__(self, targets, guesses, word_length=5, difficulty="disjoint"):
         """
         targets: list of possible target words
         guesses: list of possible guess words
-        word_length: word length to filter targets and guesses
+        word_length: length of words in targets and guesses (default = 5)
         difficulty: how strict do guesses need to be
-            disjoint = ignores any information from guesses and just eliminates any word with letters that have already been used in a guess.
-            normal = any guess is permissible. Only zero information guesses are eliminated.
-            hard = guess must
+            disjoint = eliminates any guess with letters that have already been used.
+            normal = guesses must be valid dictionary words.
+            hard = exact letters must stay fixed. elsewhere letters must be reused.
+            ultra = hard difficulty except elsewhere letters must be moved and absent letters cannot be used.
         """
-        # Filter guesses to protect the algorithm
+        # Filter guesses by word_length.
         self.word_length = word_length
         self.targets = [word for word in targets if len(word)==word_length]
-        self.guesses = [word for word in guesses if len(world)==word_length]
+        self.guesses = [word for word in guesses if len(word)==word_length]
     def __next__(self):
         """
-        returns the next guess
+        returns the guess that has the most in common with the list of targets
         """
-        # If no possible guesses, stop
+        # If no possible guesses, stop iterating.
         if not self.guesses:
             raise StopIteration
-            
-        # Update frequency
-        self.frequency = dict()
+        
+        # Calculate pattern frequency.
+        frequency = dict()
         for guess in self.guesses:
-            self.frequency[guess] = defaultdict()
+            frequency[guess] = defaultdict()
             for goal in self.targets:
                 pattern = self.compare_words(guess, goal)
-                self.frequency[guess][pattern] += 1
+                frequency[guess][pattern] += 1
         
         # Find the best guess.
         max_score = 0
@@ -50,11 +51,8 @@ class Solver:
             score -= sum([x*x for x in pattern_scores])
             if score > max_score:
                 max_score = score
-                best_guess = guess
-                
+                best_guess = guess 
         return best_guess
-    def score_word(self, guess):
-        return self._poss_prod(self.frequency[guess].values())
     def compare_words(self, guess, target):
         """
         Compares a guess to a target word and returns information like Wordle.
@@ -67,11 +65,13 @@ class Solver:
         """
         # Setup initial pattern to "u"nkown.
         pattern = ["u" for g in guess]
+        
         # Check for "e"xact matches.
         for index, letter in enumerate(guess):
             if letter == target[index]:
                 pattern[index] = "e"
                 target[index] = None
+        
         # Check for e"l"sewhere matches.
         for guess_index, guess_letter in enumerate(guess):
             if pattern[guess_index] != "u":
@@ -83,57 +83,53 @@ class Solver:
                     # break to eliminate only the first target_letter 
                     target[target_index] = None
                     break
+        
         # Convert remaining "u"nknown to "a"bsent.
         for index, letter in enumerate(pattern):
             if letter == "u":
                 pattern[index] = "a"
-        return "".join(pattern
-    def _letter_pattern2key(self, pattern):
-        return sum([value*2**index for index, value in enumerate(reversed(pattern))])
-    def _guess_pattern2key(self, pattern):
-        converter = {"unknown":0, "absent":1, "elsewhere":2, "exact":3}
-        return sum([converter[value]*4**index for index, value in enumerate(pattern)])
-    def _key2letter_pattern(self, key):
-        index = 0
-        pattern = [False] * self.word_length
-        for i in range(self.word_length):
-            pattern[i]=key%2==1
-            key=key//2
-            index+=1
-        return list(reversed(pattern))
-    def _poss_prod(self, vector):
-        total = 0
-        for val1 in vector:
-            for val2 in vector:
-                if val1!=val2:
-                    total+=val1*val2
-        return total
-    def use_clues(self, exact_clue, elsewhere_clue, absent_clue):
-        for word in self.valid_list:
+       
+        return "".join(pattern)
+    def update_disjoint(self, clue):
+        """
+        update_disjoit removes every word in guesses that has a letter in clue.
+        """
+        self.guesses = [word for word in self.guesses if all(letter not in clue for letter in word)]
+    def update_exact(self, clue):
+        self.targets = [word for word in self.targets if word[position]==letter for position, letter in clue]
+        if difficulty == "normal":
+            return
+        if difficulty == "hard" or difficulty == "ultra":
+            self.guesses = [word for word in self.guesses if word[position]==letter for position, letter in clue]
+    def update(self, exact_clue, elsewhere_clue, absent_clue):
+        for word in self.targets:
             self.validate_possible(word, exact_clue, elsewhere_clue, absent_clue)
-        for word in self.guess_words:
-            if self.difficulty==0:
-                pass
-            elif self.difficulty==1:
+        for word in self.guesses:
+            if self.difficulty == "normal":
+                break
+            elif self.difficulty == "hard":
                 self.validate_hard(word, exact_clue, elsewhere_clue, absent_clue)
-            elif self.difficulty==2:
+            elif self.difficulty == "ultra":
                 self.validate_ultra(word, exact_clue, elsewhere_clue, absent_clue)
             else:
                 raise ValueError
         self.update_frequency()
-    def validate_disjoint(self, letters):
-        for word in list(self.dictionary):
-            for letter in letters:
+    def validate_disjoint(self, used):
+        """
+        removes every word in guesses that has a letter in used.
+        """
+        for word in self.guesses:
+            for letter in used:
                 if letter in word:
-                    self.dictionary.remove(word)
+                    self.guesses.remove(word)
                     break
     def validate_possible(self, word, exact_clue, elsewhere_clue, absent_clue):
         for position, letter in exact_clue:
-            if word[position]!=letter:
+            if word[position] != letter:
                 self.possible_words.remove(word)
                 return
         for position, letter in elsewhere_clue:
-            if word[position]==letter:
+            if word[position] == letter:
                 self.possible_words.remove(word)
                 return
             elif letter not in word:
@@ -159,11 +155,11 @@ class Solver:
                 return
     def validate_ultra(self, word, exact_clue, elsewhere_clue, absent_clue):
         for position, letter in exact_clue:
-            if word[position]!=letter:
+            if word[position] != letter:
                 self.guess_words.remove(word)
                 return
         for position, letter in elsewhere_clue:
-            if word[position]==letter:
+            if word[position] == letter:
                 self.guess_words.remove(word)
                 return
             elif letter not in word:
