@@ -2,16 +2,23 @@ from collections import defaultdict
 
 
 def elect(ballot_box):
-    count = defaultdict(int)
+    """
+    
+    """
     while ballot_box:
+        count = defaultdict(int)
         for ballot in ballot_box:
             for candidate in ballot:
                 if candidate in eliminated:
                     continue
                 else:
                     count[candidate] += 1
-            else:
-                pass
+        # Greedy Candidate Elimination
+        for candidate in sorted(count, key=lambda candidate: count[candidate]):
+            pass
+    else:
+        raise NotImplementedError, "This ballot_box has an unhandled tie"
+
 class StrictRankedBallotBox(RankedBallotBox):
     def full_irv(self):
         ballots = self.ballots.copy()
