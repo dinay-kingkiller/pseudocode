@@ -12,3 +12,5 @@ def elect(ballot_box):
     winners = {c for c in count if count[c] == max(count.values())}
     if len(winners) == 1:
         return winners[0]
+    else:
+        raise NotImplemented, "This ballot_box has an unhandled tie"
