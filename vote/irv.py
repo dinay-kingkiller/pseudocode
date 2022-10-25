@@ -14,7 +14,7 @@ def elect(ballot_box):
     """
     eliminated = set()
     while ballot_box:
-        # Counting Balllots
+        # Counting Ballots
         count = defaultdict(int)
         for ballot in ballot_box:
             for candidate in ballot:
