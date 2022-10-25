@@ -7,7 +7,7 @@ def search(start, goal, edges, heuristic=lambda x: 0):
     search finds the best path between the start and goal. If there is
     no path, return None.
     
-    Keyword Arguments:
+    Arguments:
     start - the initial vertex of a graph
     goal - the vertex on the other side of the path
     edges - a map to describe the graph edges. It should return a list
