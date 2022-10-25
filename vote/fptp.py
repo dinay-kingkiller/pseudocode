@@ -1,3 +1,4 @@
+from collections import defaultdict
 def elect(ballot_box):
     """
     An algorithm for calculating the first-past-the-post (FPTP) winner.
