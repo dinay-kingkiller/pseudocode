@@ -11,8 +11,9 @@ def elect(ballot_box, valid_candidates):
     majority winner.
     
     Returns:
-    majority_winner, elimination_winner, if both exist or else
-    majority_winner, None
+    elimination_winner, if exists, the winner if all others are eliminated
+    majority_winner, if exists and elimination_winner does not, the first
+        winner with a majority of votes.
     
     
     Arugments:
@@ -38,13 +39,13 @@ def elect(ballot_box, valid_candidates):
             majority_winner = round_winner
         if len(ranked) == 1:
             elimination_winner = round_winner
-            return majority_winner, elimination_winner
+            return elimination_winner
         
         fewest_votes = min(count.values())
         round_losers = {c for c in count if count[c] == fewest_votes}
         if len(round_losers) == 1:
             eliminated |= round_losers
         if majority_winner:
-            return majority_winner, None
+            return majority_winner
         if len(round_losers) != 1:
             raise NotImplemented, "This ballot_box has an unhandled tie."
