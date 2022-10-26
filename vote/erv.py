@@ -1,8 +1,19 @@
 def elect(ballot_box, valid_candidates):
     """
-    An alternative to Instant-Runoff Voting, this algorithm eliminates the candidate with the most lowest rank votes, then rechecks the remaining candidates
+    An alternative to Instant-Runoff Voting, this algorithm eliminates
+    the candidate least preferred first. With each round of elimination,
+    it checks for winners. If one candidate has a majority, they become
+    the majority_winner. If all other candidates are eliminated they
+    become the elimination_winner. Sometimes these are not equal: finding
+    a majority is not a shortcut to the elimination winner like it is
+    for IRV. If there is a tie after a majority is reached, but before
+    the elimination winner is decided, the algorithm returns just the
+    majority winner.
     
-    Returns majority winner or (majority winner
+    Returns:
+    majority_winner, elimination_winner, if both exist or else
+    majority_winner, None
+    
     
     Arugments:
     ballot_box: a list of ordered lists of candidates
