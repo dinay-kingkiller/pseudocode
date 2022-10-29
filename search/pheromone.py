@@ -1,35 +1,30 @@
+from collections import defaultdict
 from random import choose
-
-def search(start, goal, edges, distance, distance_power=1, pheromone_power=0, evaporation_power=0, reward_power=1):
-    d
-    pheromone = dict.fromkeys(edges, 0)
-    pheromone_weight = dict.fromkeys(edges, 1)
-    distance_weight = {edge: 1/distance(edge)^distance_power for edge in edges}
-    desidict(distance_weight)
-
-    neighbors = dict()
-    for current, _ in edges:
-        neighbors[current] = [edge for edge in edges if current == edge[0]]
+def search(start, goal, moves, distance, distance_power=1, pheromones_power=0, evaporation_power=0, reward_power=1):
+    pheromones = defaultdict(int)
     swarm = range(ant_count)
+    location = [start for ant in swarm]
+    tour = [[start] for ant in swarm]
 
-    while exploring:
-        # move ants
-        for ant in swarm
-            next_edges = neighbors[location[ant]]
-            possibilities = [likelihood[edge] for edge in next_edges]
-            next_edge = choose(next_edges, weight=possibilities)
-            location[ant] = next_edge[1]
+    while True: # need an exit condition
+        # The ants go marching. One by One.
+        for ant in swarm:
+            possiblities = [m for m in moves if m[0] == location[ant]]
+            for move in possibilities:
+                desirability[move] = pheromones[move]**pheromones_power / distance(move)**distance_power
+            next_move = choose(possibilities, weight=desirability)
+            location[ant] = next_move[1]
             tour[ant].append(next_edge)
-            tour_length[ant] += distance[next_edge]
-        for edge in edges:
-            pheromone[edge] *= 1 - evaporation_power
-        for ant in swarm
-            if location[ant] != goal:
-                continue
-            for edge in path:
-                pheromone[edge] += deposit_power / tour_length[ant]
-            location[ant] = start
-            tour = [start]
-        for edge in edges:
-            pheromone_weight[edge] = pheromone[edge]**pheromone_power
-            likelihood[edge] = 
+        
+        # Update the pheromones.
+        for move in pheromones:
+            pheromones[move] = (1-evaporation_power) * pheromones[move]
+        for ant in swarm:
+            if location[ant] == goal:
+                # Reward ants who reach the goal.
+                tour_length = sum(distance(move) for move in tour[ant])
+                for edge in path:
+                    pheromone[edge] += reward_power / tour_length[ant]
+                # But also make them start again.
+                location[ant] = start
+                tour = [start]
