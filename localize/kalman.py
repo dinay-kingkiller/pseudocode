@@ -25,7 +25,7 @@ class KalmanFilter:
 		elif initial_measurement is not None:
 			self.state = self.observation * matrix(initial_measurement)
 		else:
-			raise IllegalArgumenetException('either initial_state or initial_measurement must be defined) 
+			raise IllegalArgumentException('either initial_state or initial_measurement must be defined') 
 		state_dim = len(self.motion)
 		measure_dim = len(self.observation)
 		self.state_error = zeros(state_dim, state_dim)
