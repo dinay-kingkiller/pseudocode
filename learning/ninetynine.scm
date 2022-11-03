@@ -18,6 +18,13 @@
 ; * (my-but-last '(a b c d))
 ; (C D)
 
+(define (my_but_last lst)
+  (if (null? (cddr lst)) 
+                    (car lst)
+                    (my_but_last (cdr lst))))
+(define lst '(a b c d))
+(my_but_last lst)
+
 ; P03 (*) Find the K'th element of a list.
 ; The first element in the list is number 1.
 ; Example:
