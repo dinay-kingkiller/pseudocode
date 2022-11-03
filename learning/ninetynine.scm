@@ -1,13 +1,18 @@
-; 
-; Working with Prolog lists
-; A list is either empty or it is composed of a first element (head) and a tail, which is a list itself. In Prolog we represent the empty list by the atom [] and a non-empty list by a term [H|T] where H denotes the head and T denotes the tail.
-; 
-; P01 (*) Find the last element of a list.
+
+;; Working with Lists
+ 
+; P01 Find the last element of a list.
 ; Example:
-; ?- my_last(X,[a,b,c,d]).
-; X = d
+; my_last('(a b c d)).
+; d
+
+(define (my_last lst
+
 ; P02 (*) Find the last but one element of a list.
-; (zweitletztes Element, l'avant-dernier élément)
+; Example:
+; * (my-but-last '(a b c d))
+; (C D)
+
 ; P03 (*) Find the K'th element of a list.
 ; The first element in the list is number 1.
 ; Example:
