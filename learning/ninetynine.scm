@@ -10,26 +10,26 @@
   (if (null? (cdr lst)) 
                     (car lst)
                     (my_last (cdr lst))))
-(define lst '(a b c d))
-(my_last lst)
+(my_last '(a b c d))
 
 ; P02 (*) Find the last but one element of a list.
 ; Example:
-; * (my-but-last '(a b c d))
-; (C D)
+; * (my_but_last '(a b c d))
+; c
 
 (define (my_but_last lst)
   (if (null? (cddr lst)) 
                     (car lst)
                     (my_but_last (cdr lst))))
-(define lst '(a b c d))
-(my_but_last lst)
+(my_but_last '(a b c d))
 
 ; P03 (*) Find the K'th element of a list.
 ; The first element in the list is number 1.
 ; Example:
-; ?- element_at(X,[a,b,c,d,e],3).
-; X = c
+; * element_at('(a,b,c,d,e),3).
+; c
+
+
 ; P04 (*) Find the number of elements of a list.
 ; P05 (*) Reverse a list.
 ; P06 (*) Find out whether a list is a palindrome.
