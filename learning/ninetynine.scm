@@ -48,6 +48,16 @@
 (my_length '(a b c d))
 
 ; P05 (*) Reverse a list.
+; WORK IN PROGRESS
+
+(define (reverse lst)
+  (define (reverse-tail lst rev)
+    (if (null? lst)
+        rev
+        (reverse-tail (cdr lst) (cons (car lst) rev))))
+  
+(reverse '(a b c d))
+
 ; P06 (*) Find out whether a list is a palindrome.
 ; A palindrome can be read forward or backward; e.g. [x,a,m,a,x].
 ; P07 (**) Flatten a nested list structure.
