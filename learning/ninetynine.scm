@@ -40,9 +40,12 @@
 ; P04 (*) Find the number of elements of a list.
 
 (define (my_length lst)
-    (if (null? lst)
-        0
-        (+ (my_length (cdr lst)) 1)))
+    (define (my_length_tail lst len)
+        (if (null? lst)
+            len
+            (my_length_tail (cdr lst) (+ len 1))))
+    (my_length_tail lst 0))
+(my_length '(a b c d))
 
 ; P05 (*) Reverse a list.
 ; P06 (*) Find out whether a list is a palindrome.
