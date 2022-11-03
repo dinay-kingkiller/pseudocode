@@ -6,7 +6,12 @@
 ; my_last('(a b c d)).
 ; d
 
-(define (my_last lst
+(define (my_last lst)
+  (if (null? (cdr lst)) 
+                    (car lst)
+                    (my_last (cdr lst))))
+(define lst '(a b c d))
+(my_last lst)
 
 ; P02 (*) Find the last but one element of a list.
 ; Example:
