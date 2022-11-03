@@ -3,13 +3,14 @@
  
 ; P01 Find the last element of a list.
 ; Example:
-; my_last('(a b c d)).
+; * my_last('(a b c d)).
 ; d
 
 (define (my_last lst)
-  (if (null? (cdr lst)) 
-                    (car lst)
-                    (my_last (cdr lst))))
+    (if (null? (cdr lst))
+        (car lst)
+        (my_last (cdr lst))))
+
 (my_last '(a b c d))
 
 ; P02 (*) Find the last but one element of a list.
@@ -18,19 +19,31 @@
 ; c
 
 (define (my_but_last lst)
-  (if (null? (cddr lst)) 
-                    (car lst)
-                    (my_but_last (cdr lst))))
+    (if (null? (cddr lst))
+        (car lst)
+        (my_but_last (cdr lst))))
+
 (my_but_last '(a b c d))
 
 ; P03 (*) Find the K'th element of a list.
 ; The first element in the list is number 1.
 ; Example:
-; * element_at('(a,b,c,d,e),3).
+; * (element_at '(a b c d e) 3)
 ; c
 
+(define (element_at lst ind) 
+    (if (= ind 1)
+        (car lst)
+        (element_at (cdr lst) (- ind 1))))
+ (element_at '(a b c d e) 3)
 
 ; P04 (*) Find the number of elements of a list.
+
+(define (my_length lst)
+    (if (null? lst)
+        0
+        (+ (my_length (cdr lst)) 1)))
+
 ; P05 (*) Reverse a list.
 ; P06 (*) Find out whether a list is a palindrome.
 ; A palindrome can be read forward or backward; e.g. [x,a,m,a,x].
