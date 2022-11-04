@@ -63,7 +63,7 @@
 ;; P06 (*) Find out whether a list is a palindrome.
 ; A palindrome can be read forward or backward; e.g. '(x a m a x)
 
-(define (my_palidrome? lst) (equal? (reverse lst) lst))
+(define (my_palindrome? lst) (equal? (reverse lst) lst))
 
 (my_palindrome? '(x a m a x))
 (my_palindrome? '(x a m a y))
@@ -105,7 +105,13 @@
 
 ; A better version
 
-(define flatten () ())
+(define (flatten lst)
+    (define (flatten_tail lst flat)
+        (cond
+            ((null? lst) flat)
+            ((atom? (car lst)) (flatten_tail (cdr lst) (cons (car lst) flat)))
+            ((list? (car lst)) (flatten_tail (append (car lst) (cdr lst)) flat))))
+    (reverse (flatten_tail lst '())))
 
 (flatten '(a (b (c d) e)))
 
