@@ -1,7 +1,7 @@
 
-;; Working with Lists
+;;; Working with Lists
  
-; P01 Find the last element of a list.
+;; P01 Find the last element of a list.
 ; Example:
 ; * my_last('(a b c d)).
 ; d
@@ -13,7 +13,7 @@
 
 (my_last '(a b c d))
 
-; P02 (*) Find the last but one element of a list.
+;; P02 (*) Find the last but one element of a list.
 ; Example:
 ; * (my_but_last '(a b c d))
 ; c
@@ -25,7 +25,7 @@
 
 (my_but_last '(a b c d))
 
-; P03 (*) Find the K'th element of a list.
+;; P03 (*) Find the K'th element of a list.
 ; The first element in the list is number 1.
 ; Example:
 ; * (element_at '(a b c d e) 3)
@@ -35,9 +35,10 @@
     (if (= ind 1)
         (car lst)
         (element_at (cdr lst) (- ind 1))))
- (element_at '(a b c d e) 3)
 
-; P04 (*) Find the number of elements of a list.
+(element_at '(a b c d e) 3)
+
+;; P04 (*) Find the number of elements of a list.
 
 (define (my_length lst)
     (define (my_length_tail lst len)
@@ -47,19 +48,22 @@
     (my_length_tail lst 0))
 (my_length '(a b c d))
 
-; P05 (*) Reverse a list.
-; WORK IN PROGRESS
+;; P05 (*) Reverse a list.
 
 (define (reverse lst)
-  (define (reverse-tail lst rev)
-    (if (null? lst)
-        rev
-        (reverse-tail (cdr lst) (cons (car lst) rev))))
+    (define (reverse-tail lst rev)
+        (if (null? lst)
+            rev
+            (reverse-tail (cdr lst) (cons (car lst) rev))))
+    (reverse-tail lst '()))
   
 (reverse '(a b c d))
 
-; P06 (*) Find out whether a list is a palindrome.
-; A palindrome can be read forward or backward; e.g. [x,a,m,a,x].
+;; P06 (*) Find out whether a list is a palindrome.
+; A palindrome can be read forward or backward; e.g. '(x a m a x).
+
+(define (palidrome? lst))
+
 ; P07 (**) Flatten a nested list structure.
 ; Transform a list, possibly holding lists as elements into a `flat' list by replacing each list with its elements (recursively).
 ; 
