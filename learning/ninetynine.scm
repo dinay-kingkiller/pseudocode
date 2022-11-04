@@ -7,9 +7,9 @@
 ; d
 
 (define (my_last lst)
-    (if (null? (cdr lst))
-        (car lst)
-        (my_last (cdr lst))))
+    (cond 
+        ((null? (cdr lst)) (car lst))
+        (else (my_last (cdr lst)))))
 
 (my_last '(a b c d))
 
@@ -19,9 +19,9 @@
 ; c
 
 (define (my_but_last lst)
-    (if (null? (cddr lst))
-        (car lst)
-        (my_but_last (cdr lst))))
+    (cond
+        ((null? (cddr lst)) (car lst))
+        (else (my_but_last (cdr lst)))))
 
 (my_but_last '(a b c d))
 
@@ -32,9 +32,9 @@
 ; c
 
 (define (element_at lst ind) 
-    (if (= ind 1)
-        (car lst)
-        (element_at (cdr lst) (- ind 1))))
+    (cond
+        ((= ind 1) (car lst))
+        (else (element_at (cdr lst) (- ind 1)))))
 
 (element_at '(a b c d e) 3)
 
@@ -42,19 +42,20 @@
 
 (define (my_length lst)
     (define (my_length_tail lst len)
-        (if (null? lst)
-            len
-            (my_length_tail (cdr lst) (+ len 1))))
+        (cond
+            ((null? lst) len)
+            (else (my_length_tail (cdr lst) (+ len 1)))))
     (my_length_tail lst 0))
+
 (my_length '(a b c d))
 
 ;; P05 (*) Reverse a list.
 
 (define (reverse lst)
     (define (reverse-tail lst rev)
-        (if (null? lst)
-            rev
-            (reverse-tail (cdr lst) (cons (car lst) rev))))
+        (cond
+            ((null? lst) rev)
+            (else (reverse-tail (cdr lst) (cons (car lst) rev)))))
     (reverse-tail lst '()))
   
 (reverse '(a b c d))
@@ -62,7 +63,18 @@
 ;; P06 (*) Find out whether a list is a palindrome.
 ; A palindrome can be read forward or backward; e.g. '(x a m a x).
 
-(define (palidrome? lst))
+(define (my-palidrome? lst) (equal? (reverse lst) lst))
+
+;; Better solution from http://informatimago.free.fr/i//develop/lisp/l99/index.html
+(defun palindromep (list)
+  (labels ((palstep (slow fast reve)
+             (cond
+               ((endp fast)        (equal slow reve))
+               ((endp (rest fast)) (equal (rest slow) reve))
+               (t                  (palstep (rest slow)
+                                            (rest (rest fast))
+                                            (cons (first slow) reve))))))
+    (palstep list list '())))
 
 ; P07 (**) Flatten a nested list structure.
 ; Transform a list, possibly holding lists as elements into a `flat' list by replacing each list with its elements (recursively).
