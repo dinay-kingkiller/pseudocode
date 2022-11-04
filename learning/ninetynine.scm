@@ -94,17 +94,23 @@
 
 ; Using the predefined functions list and append.
 
-(define (my_flatten lst)
-    (define (my_flatten_tail lst flat)
-        (cond
-            ((null? lst) flat)
-            ((list? (car lst)) (my_flatten_tail (append (car lst) (cdr lst)) flat))
-            (else (my_flatten_tail (cdr lst) (append flat (list (car lst)))))))
-    (my_flatten_tail lst '()))
+(define (flatten lst)
+    (cond
+        ((null? lst) lst)
+        ((list? (car lst)) (append (flatten (car lst)) (flatten (cdr lst))))
+     	(else (cons (car lst) (flatten (cdr lst))))))
 
-(my_flatten '(a (b (c d) e)))
+(flatten '(a (b (c d) e)))
 
+; A better version
 
+(define (flatten lst)
+    (cond
+        ((null? lst) lst)
+        ((list? (car lst)) 
+        
+
+(flatten '(a (b (c d) e)))
 
 ; P08 (**) Eliminate consecutive duplicates of list elements.
 ; If a list contains repeated elements they should be replaced with a single copy of the element. The order of the elements should not be changed.
