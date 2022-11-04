@@ -3,7 +3,7 @@
  
 ;; P01 Find the last element of a list.
 ; Example:
-; * my_last('(a b c d)).
+; * (my_last '(a b c d)).
 ; d
 
 (define (my_last lst)
@@ -52,42 +52,60 @@
 ;; P05 (*) Reverse a list.
 
 (define (reverse lst)
-    (define (reverse-tail lst rev)
+    (define (reverse_tail lst rev)
         (cond
             ((null? lst) rev)
-            (else (reverse-tail (cdr lst) (cons (car lst) rev)))))
-    (reverse-tail lst '()))
+            (else (reverse_tail (cdr lst) (cons (car lst) rev)))))
+    (reverse_tail lst '()))
   
 (reverse '(a b c d))
 
 ;; P06 (*) Find out whether a list is a palindrome.
-; A palindrome can be read forward or backward; e.g. '(x a m a x).
+; A palindrome can be read forward or backward; e.g. '(x a m a x)
 
-(define (my-palidrome? lst) (equal? (reverse lst) lst))
+(define (my_palidrome? lst) (equal? (reverse lst) lst))
+
+(my_palindrome? '(x a m a x))
+(my_palindrome? '(x a m a y))
+(my_palindrome? '(x a a x))
+(my_palindrome? '(x a a y))
 
 ; Better solution from http://informatimago.free.fr/i//develop/lisp/l99/index.html
 
-(define (palindrome list)
-    (define (palidrome-tail slow fast rev)
+(define (palindrome? list)
+    (define (palidrome_tail? slow fast rev)
         (cond
             ((null? fast) (equal? slow rev))
             ((null? (cdr fast)) (equal? (cdr slow) rev))
-            (else (palidrome-tail (cdr slow) (cddr fast) (cons (car slow) rev)))))
-    (palidrome-tail list list '()))
+            (else (palidrome_tail? (cdr slow) (cddr fast) (cons (car slow) rev)))))
+    (palidrome_tail? list list '()))
 
-(palindrome '(x a m a x))
-(palindrome '(x a m a y))
-(palindrome '(x a a x))
-(palindrome '(x a a y))
+(palindrome? '(x a m a x))
+(palindrome? '(x a m a y))
+(palindrome? '(x a a x))
+(palindrome? '(x a a y))
 
-; P07 (**) Flatten a nested list structure.
+;; P07 (**) Flatten a nested list structure.
 ; Transform a list, possibly holding lists as elements into a `flat' list by replacing each list with its elements (recursively).
-; 
 ; Example:
-; ?- my_flatten([a, [b, [c, d], e]], X).
-; X = [a, b, c, d, e]
-; 
-; Hint: Use the predefined predicates is_list/1 and append/3
+; * (my_flatten '(a (b (c d) e)))
+; '(a b c d e)
+; Hint: Use the predefined functions list and append.
+
+; Using the predefined functions list and append.
+
+(define (my_flatten lst)
+    (define (my_flatten_tail lst flat)
+        (cond
+            ((null? lst) flat)
+            ((list? (car lst)) (my_flatten_tail (append (car lst) (cdr lst)) flat))
+            (else (my_flatten_tail (cdr lst) (append flat (list (car lst)))))))
+    (my_flatten_tail lst '()))
+
+(my_flatten '(a (b (c d) e)))
+
+
+
 ; P08 (**) Eliminate consecutive duplicates of list elements.
 ; If a list contains repeated elements they should be replaced with a single copy of the element. The order of the elements should not be changed.
 ; 
