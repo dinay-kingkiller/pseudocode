@@ -65,16 +65,17 @@
 
 (define (my-palidrome? lst) (equal? (reverse lst) lst))
 
-;; Better solution from http://informatimago.free.fr/i//develop/lisp/l99/index.html
-(defun palindromep (list)
-  (labels ((palstep (slow fast reve)
-             (cond
-               ((endp fast)        (equal slow reve))
-               ((endp (rest fast)) (equal (rest slow) reve))
-               (t                  (palstep (rest slow)
-                                            (rest (rest fast))
-                                            (cons (first slow) reve))))))
-    (palstep list list '())))
+; Better solution from http://informatimago.free.fr/i//develop/lisp/l99/index.html
+;;; NEEDS FIXED
+(define (palindrome list)
+    (define (palidrome-tail (slow fast rev))
+        (cond
+            ((null? fast) (equal? slow rev))
+            ((null? (cdr fast)) (equal (cdr slow) rev))
+            (else (palidrome-tail (cdr slow) (cddr fast) (cons (car slow) rev)))))
+    (palidrome-tail list list '()))
+
+(palidrome '(x a m a x))
 
 ; P07 (**) Flatten a nested list structure.
 ; Transform a list, possibly holding lists as elements into a `flat' list by replacing each list with its elements (recursively).
