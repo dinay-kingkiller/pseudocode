@@ -92,23 +92,20 @@
 ; '(a b c d e)
 ; Hint: Use the predefined functions list and append.
 
-; Using the predefined functions list and append.
+; Using the predefined functions list and append. (use of list from http://informatimago.free.fr/i//develop/lisp/l99/index.html)
 
-(define (flatten lst)
+(define (my_flatten lst)
     (cond
         ((null? lst) lst)
-        ((list? (car lst)) (append (flatten (car lst)) (flatten (cdr lst))))
-     	(else (cons (car lst) (flatten (cdr lst))))))
+        ((atom? lst) (list lst))
+        ((list? (car lst)) (append (my_flatten (car lst)) (my_flatten (cdr lst))))
+        (else (append (list (car lst)) (my_flatten (cdr lst))))))
 
-(flatten '(a (b (c d) e)))
+(my_flatten '(a (b (c d) e)))
 
 ; A better version
 
-(define (flatten lst)
-    (cond
-        ((null? lst) lst)
-        ((list? (car lst)) 
-        
+(define flatten () ())
 
 (flatten '(a (b (c d) e)))
 
