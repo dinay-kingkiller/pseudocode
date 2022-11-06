@@ -1,4 +1,3 @@
-
 ;;; Working with Lists
  
 ;; P01 Find the last element of a list.
@@ -104,14 +103,14 @@
 (my_flatten '(a (b (c d) e)))
 
 ; A better version
-
 (define (flatten lst)
-    (define (flatten_tail lst flat)
+    (define (flatten-tail lst rest flat)
         (cond
-            ((null? lst) flat)
-            ((atom? (car lst)) (flatten_tail (cdr lst) (cons (car lst) flat)))
-            ((list? (car lst)) (flatten_tail (append (car lst) (cdr lst)) flat))))
-    (reverse (flatten_tail lst '())))
+            ((null? lst)  flat)
+            ((atom? lst) (flatten-tail rest '() (cons lst flat)))
+            ((null? (cdr lst)) (flatten-tail (car lst)  rest flat))
+            ((list? lst) (flatten-tail (car lst) (cons (cdr lst) rest) flat))))
+    (reverse (flatten-tail lst '() '())))
 
 (flatten '(a (b (c d) e)))
 
