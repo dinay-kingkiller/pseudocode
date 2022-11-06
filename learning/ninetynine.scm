@@ -102,14 +102,15 @@
 
 (my_flatten '(a (b (c d) e)))
 
-; A better version
+; A tail-recursion method that doesn't use append
+
 (define (flatten lst)
     (define (flatten-tail lst rest flat)
         (cond
             ((null? lst)  flat)
-            ((atom? lst) (flatten-tail rest '() (cons lst flat)))
-            ((null? (cdr lst)) (flatten-tail (car lst)  rest flat))
-            ((list? lst) (flatten-tail (car lst) (cons (cdr lst) rest) flat))))
+            ((list? (car lst)) (flatten-tail (car lst) (cons (cdr lst) rest) flat))
+            ((null? (cdr lst)) (flatten-tail rest '() (cons (car lst) flat)))
+            (else (flatten-tail (cdr lst) rest (cons (car lst) flat)))))
     (reverse (flatten-tail lst '() '())))
 
 (flatten '(a (b (c d) e)))
