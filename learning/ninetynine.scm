@@ -102,7 +102,7 @@
 
 (my_flatten '(a (b (c d) e)))
 
-; A tail-recursion method that doesn't use append
+; A better tail-recursion method not using list or append.
 
 (define (flatten lst)
     (define (flatten-tail lst rest flat)
