@@ -149,7 +149,7 @@
 
 (pack '(a a a a b c c a a d e e e e))
 
-;; P10 (*) Run-length encoding of a list.
+; P10 (*) Run-length encoding of a list.
 ; Use the result of problem P09 to implement the so-called run-length encoding data compression method. Consecutive duplicates of elements are encoded as terms (N E) where N is the number of duplicates of the element E.
 ; Example:
 ; * (encode '(a a a a b c c a a d e e e e))
@@ -166,13 +166,15 @@
 
 (encode '(a a a a b c c a a d e e e e))
 
-;; P11 (*) Modified run-length encoding.
-; Modify the result of problem P10 in such a way that if an element has no duplicates it is simply copied into the result list. Only elements with duplicates are transferred as (N E) terms.
-; Example:
-; * (encode_modified '(a a a a b c c a a d e e e e)
-; ((4 a) b (2 c) (2 a) d (4 e))
+(define (encode_modified lst)
+    (define (modify_tail encoded modified)
+      	(cond
+         	((null? encoded) modified)
+         	((equal? 1 (caar encoded)) (modify_tail (cdr encoded) (cons (cadar encoded) modified)))
+         	(else (modify_tail (cdr encoded) (cons (car encoded) modified)))))
+	(reverse (modify_tail (encode lst) '())))
 
-(encode_modified '(a a a a b c c a a d e e e e)
+(encode_modified '(a a a a b c c a a d e e e e))
 
 ; P12 (**) Decode a run-length encoded list.
 ; Given a run-length code list generated as specified in problem P11. Construct its uncompressed version.
