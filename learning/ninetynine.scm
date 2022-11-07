@@ -166,6 +166,12 @@
 
 (encode '(a a a a b c c a a d e e e e))
 
+;; P11 (*) Modified run-length encoding.
+; Modify the result of problem P10 in such a way that if an element has no duplicates it is simply copied into the result list. Only elements with duplicates are transferred as (N E) terms.
+; Example:
+; * (encode_modified '(a a a a b c c a a d e e e e)
+; ((4 a) b (2 c) (2 a) d (4 e))
+
 (define (encode_modified lst)
     (define (modify_tail encoded modified)
       	(cond
@@ -176,8 +182,11 @@
 
 (encode_modified '(a a a a b c c a a d e e e e))
 
-; P12 (**) Decode a run-length encoded list.
+;; P12 (**) Decode a run-length encoded list.
 ; Given a run-length code list generated as specified in problem P11. Construct its uncompressed version.
+
+(decode (encode_modified '(a a a a b c c a a d e e e e)))
+
 ; P13 (**) Run-length encoding of a list (direct solution).
 ; Implement the so-called run-length encoding data compression method directly. I.e. don't explicitly create the sublists containing the duplicates, as in problem P09, but only count them. As in problem P11, simplify the result list by replacing the singleton terms [1,X] by X.
 ; 
