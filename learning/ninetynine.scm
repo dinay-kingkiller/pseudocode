@@ -105,13 +105,13 @@
 ; A better tail-recursion method not using list or append.
 
 (define (flatten lst)
-    (define (flatten-tail lst rest flat)
+    (define (flatten_tail lst rest flat)
         (cond
             ((null? lst)  flat)
-            ((list? (car lst)) (flatten-tail (car lst) (cons (cdr lst) rest) flat))
-            ((null? (cdr lst)) (flatten-tail rest '() (cons (car lst) flat)))
-            (else (flatten-tail (cdr lst) rest (cons (car lst) flat)))))
-    (reverse (flatten-tail lst '() '())))
+            ((list? (car lst)) (flatten_tail (car lst) (cons (cdr lst) rest) flat))
+            ((null? (cdr lst)) (flatten_tail rest '() (cons (car lst) flat)))
+            (else (flatten_tail (cdr lst) rest (cons (car lst) flat)))))
+    (reverse (flatten_tail lst '() '())))
 
 (flatten '(a (b (c d) e)))
 
@@ -122,13 +122,13 @@
 ; '(a b c a d e)
 
 (define (compress lst)
-    (define (compress-tail lst compressed)
+    (define (compress_tail lst compressed)
         (cond
             ((null? lst) compressed)
-            ((null? compressed) (compress-tail (cdr lst) (list (car lst))))
-            ((equal? (car lst) (car compressed)) (compress-tail (cdr lst) compressed))
-            (else (compress-tail (cdr lst) (cons (car lst) compressed)))))
-    (reverse (compress-tail lst '())))
+            ((null? compressed) (compress_tail (cdr lst) (list (car lst))))
+            ((equal? (car lst) (car compressed)) (compress_tail (cdr lst) compressed))
+            (else (compress_tail (cdr lst) (cons (car lst) compressed)))))
+    (reverse (compress_tail lst '())))
 
 (compress '(a a a a b c c a a d e e e e))
 
@@ -139,30 +139,41 @@
 ; ((a a a a) (b) (c c) (a a) (d) (e e e e))
 
 (define (pack lst)
-    (define (pack-tail lst packed)
+    (define (pack_tail lst packed)
         (cond
             ((null? lst) packed)
-            ((null? packed) (pack-tail (cdr lst) (list (list (car lst)))))
-            ((equal? (car lst) (caar packed)) (pack-tail (cdr lst) (cons (cons (car lst) (car packed)) (cdr packed))))
-            (else (pack-tail (cdr lst) (cons (list (car lst)) packed)))))
-    (reverse (pack-tail lst '())))
+            ((null? packed) (pack_tail (cdr lst) (list (list (car lst)))))
+            ((equal? (car lst) (caar packed)) (pack_tail (cdr lst) (cons (cons (car lst) (car packed)) (cdr packed))))
+            (else (pack_tail (cdr lst) (cons (list (car lst)) packed)))))
+    (reverse (pack_tail lst '())))
 
 (pack '(a a a a b c c a a d e e e e))
 
-; P10 (*) Run-length encoding of a list.
+;; P10 (*) Run-length encoding of a list.
 ; Use the result of problem P09 to implement the so-called run-length encoding data compression method. Consecutive duplicates of elements are encoded as terms (N E) where N is the number of duplicates of the element E.
 ; Example:
 ; * (encode '(a a a a b c c a a d e e e e))
 ; ((4 a) (1 b) (2 c) (2 a) (1 d) (4 e))
 
+(define (encode lst)
+    (define (encode_tail lst encoded)
+        (cond
+            ((null? lst) encoded)
+            ((null? encoded) (encode_tail (cdr lst) (list (cons 1 (list (car lst))))))
+            ((equal? (car lst) (cadar encoded)) (encode_tail (cdr lst) (cons (list (+ 1 (caar encoded)) (cadar encoded)) (cdr encoded))))
+            (else (encode_tail (cdr lst) (cons (list 1 (car lst)) encoded)))))
+    (reverse (encode_tail lst '())))
+
 (encode '(a a a a b c c a a d e e e e))
 
-; P11 (*) Modified run-length encoding.
-; Modify the result of problem P10 in such a way that if an element has no duplicates it is simply copied into the result list. Only elements with duplicates are transferred as [N,E] terms.
-; 
+;; P11 (*) Modified run-length encoding.
+; Modify the result of problem P10 in such a way that if an element has no duplicates it is simply copied into the result list. Only elements with duplicates are transferred as (N E) terms.
 ; Example:
-; ?- encode_modified([a,a,a,a,b,c,c,a,a,d,e,e,e,e],X).
-; X = [[4,a],b,[2,c],[2,a],d,[4,e]]
+; * (encode_modified '(a a a a b c c a a d e e e e)
+; ((4 a) b (2 c) (2 a) d (4 e))
+
+(encode_modified '(a a a a b c c a a d e e e e)
+
 ; P12 (**) Decode a run-length encoded list.
 ; Given a run-length code list generated as specified in problem P11. Construct its uncompressed version.
 ; P13 (**) Run-length encoding of a list (direct solution).
