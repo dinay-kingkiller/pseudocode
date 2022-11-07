@@ -169,7 +169,7 @@
 ;; P11 (*) Modified run-length encoding.
 ; Modify the result of problem P10 in such a way that if an element has no duplicates it is simply copied into the result list. Only elements with duplicates are transferred as (N E) terms.
 ; Example:
-; * (encode_modified '(a a a a b c c a a d e e e e)
+; * (encode_modified '(a a a a b c c a a d e e e e))
 ; ((4 a) b (2 c) (2 a) d (4 e))
 
 (define (encode_modified lst)
@@ -187,25 +187,41 @@
 
 (define (decode encoded)
     (define (decode_tail encoded decoded)
-    	(cond
-        	((null? encoded) decoded)
-			((atom? (car encoded)) (decode_tail (cdr encoded) (cons (car encoded) decoded)))
-         	((equal? (caar encoded) 1) (decode_tail (cdr encoded) (cons (cadar encoded) decoded)))
-         	(else (decode_tail (cons (cons (- (caar encoded) 1) (cdar encoded)) (cdr encoded)) (cons (cadar encoded) decoded)))))
-	(reverse (decode_tail encoded '())))
+        (cond
+            ((null? encoded) decoded)
+            ((atom? (car encoded)) (decode_tail (cdr encoded) (cons (car encoded) decoded)))
+            ((equal? (caar encoded) 1) (decode_tail (cdr encoded) (cons (cadar encoded) decoded)))
+            (else (decode_tail (cons (cons (- (caar encoded) 1) (cdar encoded)) (cdr encoded)) (cons (cadar encoded) decoded)))))
+    (reverse (decode_tail encoded '())))
 
 (decode (encode_modified '(a a a a b c c a a d e e e e)))
 
 ; P13 (**) Run-length encoding of a list (direct solution).
-; Implement the so-called run-length encoding data compression method directly. I.e. don't explicitly create the sublists containing the duplicates, as in problem P09, but only count them. As in problem P11, simplify the result list by replacing the singleton terms [1,X] by X.
-; 
+; Implement the so-called run-length encoding data compression method directly. I.e. don't explicitly create the sublists containing the duplicates, as in problem P09, but only count them. As in problem P11, simplify the result list by replacing the singleton terms (1 X) by X.
 ; Example:
-; ?- encode_direct([a,a,a,a,b,c,c,a,a,d,e,e,e,e],X).
-; X = [[4,a],b,[2,c],[2,a],d,[4,e]]
+; * (encode_direct '(a a a a b c c a a d e e e e))
+; ((4 a) b (2 c) (2 a) d (4 e))
+
+(define (encode_direct lst)
+    (define (encode_tail lst encoded)
+        (cond
+            ((null? lst) encoded)
+            ((null? encoded) (encode_tail (cdr lst) (list (car lst))))
+            ((equal? (car lst) (car encoded)) (encode_tail (cdr lst) (cons (list 2 (car lst)) (cdr encoded))))
+            ((atom? (car encoded)) (encode_tail (cdr lst) (cons (car lst) encoded)))
+            ((equal? (car lst) (cadar encoded)) (encode_tail (cdr lst) (cons (list (+ 1 (caar encoded)) (car lst)) (cdr encoded))))
+            (else (encode_tail (cdr lst) (cons (car lst) encoded)))))
+    (reverse (encode_tail lst '())))
+
+(encode_direct '(a a a a b c c a a d e e e e))
+
 ; P14 (*) Duplicate the elements of a list.
 ; Example:
-; ?- dupli([a,b,c,c,d],X).
-; X = [a,a,b,b,c,c,c,c,d,d]
+; * (dupli '(a b c c d))
+; (a a b b c c c c d d)
+
+(dupli '(a b c c d))
+
 ; P15 (**) Duplicate the elements of a list a given number of times.
 ; Example:
 ; ?- dupli([a,b,c],3,X).
