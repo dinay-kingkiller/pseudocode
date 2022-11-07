@@ -115,12 +115,23 @@
 
 (flatten '(a (b (c d) e)))
 
-; P08 (**) Eliminate consecutive duplicates of list elements.
+;; P08 (**) Eliminate consecutive duplicates of list elements.
 ; If a list contains repeated elements they should be replaced with a single copy of the element. The order of the elements should not be changed.
-; 
 ; Example:
-; ?- compress([a,a,a,a,b,c,c,a,a,d,e,e,e,e],X).
-; X = [a,b,c,a,d,e]
+; * (compress '(a a a a b c c a a d e e e e))
+; '(a b c a d e)
+
+(define (compress lst)
+    (define (compress-tail lst comp)
+        (cond
+            ((null? lst) comp)
+            ((null? comp) (compress-tail (cdr lst) (list (car lst))))
+            ((equal? (car lst) (car comp)) (compress-tail (cdr lst) comp))
+            (else (compress-tail (cdr lst) (cons (car lst) comp)))))
+    (reverse (compress-tail lst '())))
+
+(compress '(a a a a b c c a a d e e e e))
+
 ; P09 (**) Pack consecutive duplicates of list elements into sublists.
 ; If a list contains repeated elements they should be placed in separate sublists.
 ; 
