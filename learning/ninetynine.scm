@@ -185,6 +185,15 @@
 ;; P12 (**) Decode a run-length encoded list.
 ; Given a run-length code list generated as specified in problem P11. Construct its uncompressed version.
 
+(define (decode encoded)
+    (define (decode_tail encoded decoded)
+    	(cond
+        	((null? encoded) decoded)
+			((atom? (car encoded)) (decode_tail (cdr encoded) (cons (car encoded) decoded)))
+         	((equal? (caar encoded) 1) (decode_tail (cdr encoded) (cons (cadar encoded) decoded)))
+         	(else (decode_tail (cons (cons (- (caar encoded) 1) (cdar encoded)) (cdr encoded)) (cons (cadar encoded) decoded)))))
+	(reverse (decode_tail encoded '())))
+
 (decode (encode_modified '(a a a a b c c a a d e e e e)))
 
 ; P13 (**) Run-length encoding of a list (direct solution).
