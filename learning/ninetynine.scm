@@ -220,15 +220,25 @@
 ; * (dupli '(a b c c d))
 ; (a a b b c c c c d d)
 
+(define (dupli lst)
+    (define (dupli_tail lst duplied)
+        (cond
+            ((null? lst) duplied)
+            (else (dupli_tail (cdr lst) (cons (car lst) (cons (car lst) duplied))))))
+    (reverse (dupli_tail lst '())))
+
 (dupli '(a b c c d))
 
 ; P15 (**) Duplicate the elements of a list a given number of times.
 ; Example:
-; ?- dupli([a,b,c],3,X).
-; X = [a,a,a,b,b,b,c,c,c]
-; 
+; * (dupli '(a b c) 3)
+; (a a a b b b c c c)
 ; What are the results of the goal:
-; ?- dupli(X,3,Y).
+; * (dupli (dupli '(a b c) 3) 3)
+
+(dupli '(a b c) 3)
+(dupli (dupli '(a b c) 3) 3)
+
 ; P16 (**) Drop every N'th element from a list.
 ; Example:
 ; ?- drop([a,b,c,d,e,f,g,h,i,k],3,X).
