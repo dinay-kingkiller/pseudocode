@@ -155,16 +155,9 @@
 ; * (encode '(a a a a b c c a a d e e e e))
 ; ((4 a) (1 b) (2 c) (2 a) (1 d) (4 e))
 
-(define (encode lst)
-    (define (encode_tail lst encoded)
-        (cond
-            ((null? lst) encoded)
-            ((null? encoded) (encode_tail (cdr lst) (list (cons 1 (list (car lst))))))
-            ((equal? (car lst) (cadar encoded)) (encode_tail (cdr lst) (cons (list (+ 1 (caar encoded)) (cadar encoded)) (cdr encoded))))
-            (else (encode_tail (cdr lst) (cons (list 1 (car lst)) encoded)))))
-    (reverse (encode_tail lst '())))
+; (define (encode lst) (map (lambda (packet) (list (length packet) (car packet))) (pack list)))
 
-(encode '(a a a a b c c a a d e e e e))
+; (encode '(a a a a b c c a a d e e e e))
 
 ;; P11 (*) Modified run-length encoding.
 ; Modify the result of problem P10 in such a way that if an element has no duplicates it is simply copied into the result list. Only elements with duplicates are transferred as (N E) terms.
