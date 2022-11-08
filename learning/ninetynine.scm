@@ -236,16 +236,27 @@
 ; What are the results of the goal:
 ; * (dupli (dupli '(a b c) 3) 3)
 
+(define (dupli lst n)
+    (define (dupli-tail lst n k duplied)
+        (cond
+            ((null? lst) duplied)
+            ((equal? k 0) (dupli-tail (cdr lst) n n duplied))
+         	(else (dupli-tail lst n (- k 1) (cons (car lst) duplied)))))
+    (reverse (dupli-tail lst n n '())))
+
 (dupli '(a b c) 3)
 (dupli (dupli '(a b c) 3) 3)
+; (a a a a a a a a a b b b b b b b b b c c c c c c c c c)
 
 ; P16 (**) Drop every N'th element from a list.
 ; Example:
-; ?- drop([a,b,c,d,e,f,g,h,i,k],3,X).
-; X = [a,b,d,e,g,h,k]
+; * (drop '(a b c d e f g h i k) 3)
+; (a b d e g h k)
+
+
+
 ; P17 (*) Split a list into two parts; the length of the first part is given.
-; Do not use any predefined predicates.
-; 
+; Do not use any predefined functions.
 ; Example:
 ; ?- split([a,b,c,d,e,f,g,h,i,k],3,L1,L2).
 ; L1 = [a,b,c]
