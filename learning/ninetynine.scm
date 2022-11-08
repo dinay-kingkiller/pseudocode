@@ -155,8 +155,19 @@
 ; * (encode '(a a a a b c c a a d e e e e))
 ; ((4 a) (1 b) (2 c) (2 a) (1 d) (4 e))
 
-; (define (encode lst) (map (lambda (packet) (list (length packet) (car packet))) (pack list)))
+(define (encode lst)
+    (define (encode_tail lst encoded)
+        (cond
+            ((null? lst) encoded)
+            ((null? encoded) (encode_tail (cdr lst) (list (cons 1 (list (car lst))))))
+            ((equal? (car lst) (cadar encoded)) (encode_tail (cdr lst) (cons (list (+ 1 (caar encoded)) (cadar encoded)) (cdr encoded))))
+            (else (encode_tail (cdr lst) (cons (list 1 (car lst)) encoded)))))
+    (reverse (encode_tail lst '())))
 
+(encode '(a a a a b c c a a d e e e e))
+
+; A functional method that the interpreter doesn't like.
+; (define (encode lst) (map (lambda (packet) (list (length packet) (car packet))) (pack list)))
 ; (encode '(a a a a b c c a a d e e e e))
 
 ;; P11 (*) Modified run-length encoding.
@@ -174,6 +185,16 @@
 	(reverse (modify_tail (encode lst) '())))
 
 (encode_modified '(a a a a b c c a a d e e e e))
+
+; A functional method that the interpreter doesn't like.
+; (define (encode_modified lst)
+;     (map
+;         (lambda (packet)
+;             (cond
+;                 (equal? 1 (length packet))
+;                 (else (list (length packet) (car packet)))))
+;         (pack lst)))
+; (encode_modified '(a a a a b c c a a d e e e e))
 
 ;; P12 (**) Decode a run-length encoded list.
 ; Given a run-length code list generated as specified in problem P11. Construct its uncompressed version.
