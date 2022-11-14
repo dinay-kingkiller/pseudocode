@@ -73,7 +73,7 @@
 (display "P06: (palindrome? '(x a m a x))\n")
 (display (palindrome? '(x a m a x))) (newline) (newline)
 
-; Better solution from http://informatimago.free.fr/i//develop/lisp/l99/index.html
+; A faster solution from http://informatimago.free.fr/i//develop/lisp/l99/p06.lisp
 
 (define (palindrome? list)
   (define (palidrome-tail? slow fast rev)
@@ -93,7 +93,7 @@
 ; (a b c d e)
 ; Hint: Use the predefined functions list and append.
 
-; Using the predefined functions list and append. (use of list from http://informatimago.free.fr/i//develop/lisp/l99/index.html)
+; Using the predefined functions list and append. (use of list from http://informatimago.free.fr/i//develop/lisp/l99/p07.lisp)
 
 (define (flatten lst)
   (cond
@@ -116,6 +116,13 @@
   (reverse (flatten-tail lst '() '())))
 
 (display "P07: [tail-recursive] (flatten '(a (b (c d) e)))\n")
+(display (flatten '(a (b (c d) e)))) (newline) (newline)
+
+; A more functional solution using recursion plus mapcan
+
+(define (flatten lst) (mapcan (lambda (value) (if (list? value) (flatten value) (list value))) lst))
+
+(display "P07: [functional] (flatten '(a (b (c d) e)))\n")
 (display (flatten '(a (b (c d) e)))) (newline) (newline)
 
 ;; P08 (**) Eliminate consecutive duplicates of list elements.
@@ -142,6 +149,23 @@
 ; * (pack '(a a a a b c c a a d e e e e))
 ; ((a a a a) (b) (c c) (a a) (d) (e e e e))
 
+; A nice recursive solution from http://informatimago.free.fr/i//develop/lisp/l99/p09.lisp
+
+(define (pack lst)
+  (define (group-run element group lst)
+    (cond
+     ((null? lst) (list (cons element group)))
+     ((equal? (car lst) element) (group-run element (cons element group) (cdr lst)))
+     (else (cons (cons element group) (group-run (car lst) '() (cdr lst))))))
+  (if (null? list)
+      '()
+      (group-run (car lst) '() (cdr lst))))
+
+(display "P09: [recursive] (pack '(a a a a b c c a a d e e e e))\n")
+(display (pack '(a a a a b c c a a d e e e e))) (newline) (newline)
+
+; My tail recursive solution
+
 (define (pack lst)
   (define (pack-tail lst packed)
     (cond
@@ -154,26 +178,11 @@
    ((null? lst) '())
    (else (reverse (pack-tail (cdr lst) (list (list (car lst))))))))
 
-(display "P09: (pack '(a a a a b c c a a d e e e e))\n")
+(display "P09: [tail recursive] (pack '(a a a a b c c a a d e e e e))\n")
 (display (pack '(a a a a b c c a a d e e e e))) (newline) (newline)
 
-;; Better recursive
-
-(define (pack lst)
-  (define (group-run element group list)
-    (cond
-     ((null? lst) (list (cons element group)))
-     ((equal? (car lst) element) (group-run element (cons element group) (cdr lst)))
-     (else (cons (cons element group) (group-run (car lst) '() (cdr lst))))))
-  (if (null? list)
-      '()
-      (group-run (car lst) '() (cdr lst))))
-
-(display "P09: (pack '(a a a a b c c a a d e e e e))\n")
-;; (display (pack '(a a a a b c c a a d e e e e))) (newline) (newline)
-
 ;; P10 (*) Run-length encoding of a list.
-; Use the result of problem P09 to implement the so-called run-length encoding data compression method. Consecutive duplicates of elements are encoded as lists (N E) where N is the number of duplicates of the element E.
+; Use the result of problem P09 to implement the so-called run-length encoding data compression method. Consecutive duplicates of elements are encoded as lists (n e) where n is the number of duplicates of the element e.
 ; Example:
 ; * (encode '(a a a a b c c a a d e e e e))
 ; ((4 a) (1 b) (2 c) (2 a) (1 d) (4 e))
@@ -188,17 +197,17 @@
   (reverse (encode-tail lst '())))
 
 (display "P10: [recursive] (encode '(a a a a b c c a a d e e e e))\n")
-;; (display (encode '(a a a a b c c a a d e e e e))) (newline) (newline)
+(display (encode '(a a a a b c c a a d e e e e))) (newline) (newline)
 
-; Functional Method
+; A functional solution
 
-;; (define (encode lst) (map (lambda (packet) (list (length packet) (car packet))) (pack lst)))
+(define (encode lst) (map (lambda (packet) (list (length packet) (car packet))) (pack lst)))
 
 (display "P10: [functional] (encode '(a a a a b c c a a d e e e e))\n")
-;; (display (encode '(a a a a b c c a a d e e e e))) (newline) (newline)
+(display (encode '(a a a a b c c a a d e e e e))) (newline) (newline)
 
 ;; P11 (*) Modified run-length encoding.
-; Modify the result of problem P10 in such a way that if an element has no duplicates it is simply copied into the result list. Only elements with duplicates are transferred as (N E) lists.
+; Modify the result of problem P10 in such a way that if an element has no duplicates it is simply copied into the result list. Only elements with duplicates are transferred as (n e) lists.
 ; Example:
 ; * (encode-modified '(a a a a b c c a a d e e e e))
 ; ((4 a) b (2 c) (2 a) d (4 e))
@@ -212,7 +221,9 @@
   (reverse (modify-tail (encode lst) '())))
 
 (display "P11: [recursive] (encode-modified '(a a a a b c c a a d e e e e))\n")
-;; (display (encode-modified '(a a a a b c c a a d e e e e))) (newline) (newline)
+(display (encode-modified '(a a a a b c c a a d e e e e))) (newline) (newline)
+
+; A fast functional solution
 
 (define (encode-modified lst)
   (map
@@ -229,39 +240,27 @@
   (define (decode-tail encoded decoded)
     (cond
      ((null? encoded) decoded)
-     ((not (list? (car encoded))) (decode-tail
-				   (cdr encoded)
-				   (cons (car encoded) decoded)))
-     ((null? decoded) (decode-tail
-		       (cons (cons (- (caar encoded) 1) (cdar encoded)) (cdr encoded))
-		       (cons (cadar encoded) decoded)))
-     ((equal? (caar encoded) 0) (decode-tail
-				 (cdr encoded)
-				 decoded))
-     ((equal? (cadar encoded) (car decoded)) (decode-tail
-					      (cons (cons (- (caar encoded) 1) (cdar encoded))
-						    (cdr encoded)) (cons (cadar encoded) decoded)))
-     (else (decode-tail
-	    (cons (cons (- (caar encoded) 1) (cdar encoded)) (cdr encoded))
-	    (cons (cadar encoded) decoded)))))
-    (reverse (decode-tail encoded '())))
+     ((list? (car encoded)) (decode-tail
+			     (cdr encoded)
+			     (append (make-list (caar encoded) (cadar encoded)) decoded))) 
+     (else (decode-tail (cdr encoded) (cons (car encoded) decoded)))))
+  (reverse (decode-tail encoded '())))
 
 (display "P12: [recursive] (decode (encode-modified '(a a a a b c c a a d e e e e)))\n")
 (display (decode (encode-modified '(a a a a b c c a a d e e e e)))) (newline) (newline)
 
-(define (repeat val k)
-  (if (equal? k 0) '()
-      (cons val (repeat val (- k 1)))))
-
+; A functional solution
 (define (decode lst)
-  (flatten
-   (map (lambda (packet) (if (list? packet) (repeat (cadr packet) (car packet)) packet)) lst)))
+  (mapcan (lambda (packet)
+	    (if (list? packet)
+		(make-list (car packet) (cadr packet))
+		(list packet))) lst))
 
 (display "P12: [functional] (decode (encode-modified '(a a a a b c c a a d e e e e)))\n")
 (display (decode (encode-modified '(a a a a b c c a a d e e e e)))) (newline) (newline)
 
 ;; P13 (**) Run-length encoding of a list (direct solution).
-; Implement the so-called run-length encoding data compression method directly. I.e. don't explicitly create the sublists containing the duplicates, as in problem P09, but only count them. As in problem P11, simplify the result list by replacing the singleton lists (1 X) by X.
+; Implement the so-called run-length encoding data compression method directly. I.e. don't explicitly create the sublists containing the duplicates, as in problem P09, but only count them. As in problem P11, simplify the result list by replacing the singleton lists (1 x) by x.
 ;; Example:
 ; * (encode-direct '(a a a a b c c a a d e e e e))
 ; ((4 a) b (2 c) (2 a) d (4 e))
@@ -270,12 +269,17 @@
   (define (encode-tail lst encoded)
     (cond
      ((null? lst) encoded)
-     ((null? encoded) (encode-tail (cdr lst) (list (car lst))))
-     ((equal? (car lst) (car encoded)) (encode-tail (cdr lst) (cons (list 2 (car encoded)) (cdr encoded))))
-     ((not (list? (car encoded))) (encode-tail (cdr lst) (cons (car lst) encoded)))
-     ((equal? (car lst) (cadar encoded)) (encode-tail (cdr lst) (cons (cons (+ (caar encoded) 1) (cdar encoded)) (cdr encoded))))
-     (else (encode-tail (cdr lst) (cons (car lst) encoded)))))
-  (reverse (encode-tail lst '())))
+     ((equal? (car lst) (car encoded))
+      (encode-tail (cdr lst) (cons (list 2 (car encoded)) (cdr encoded))))
+     ((not (list? (car encoded)))
+      (encode-tail (cdr lst) (cons (car lst) encoded)))
+     ((equal? (car lst) (cadar encoded))
+      (encode-tail (cdr lst) (cons (cons (+ (caar encoded) 1) (cdar encoded)) (cdr encoded))))
+     (else
+      (encode-tail (cdr lst) (cons (car lst) encoded)))))
+  (cond
+   ((null? lst) lst)
+   (else (reverse (encode-tail (cdr lst) (list (car lst)))))))
 
 (display "P13: (encode-direct '(a a a a b c c a a d e e e e))\n")
 (display (encode-direct '(a a a a b c c a a d e e e e))) (newline) (newline)
@@ -292,7 +296,14 @@
      (else (dupli-tail (cdr lst) (cons (car lst) (cons (car lst) duplied))))))
   (reverse (dupli-tail lst '())))
 
-(display "P14: (dupli '(a b c c d))\n")
+(display "P14: [recursive] (dupli '(a b c c d))\n")
+(display (dupli '(a b c c d))) (newline) (newline)
+
+; nicer version from http://informatimago.free.fr/i//develop/lisp/l99/p14.lisp
+
+(define (dupli lst) (mapcan (lambda (item) (list item item)) lst))
+
+(display "P14 [functional]: (dupli '(a b c c d))\n")
 (display (dupli '(a b c c d))) (newline) (newline)
 
 ;; P15 (**) Replicate the elements of a list a given number of times.
@@ -311,25 +322,23 @@
 (display "P15: [recursive] (repli '(a b c) 3)\n")
 (display (repli '(a b c) 3)) (newline) (newline)
 
-(define (repli lst k)
-  (flatten
-   (map (lambda (val) (repeat val k)) lst)))
+(define (repli lst k) (mapcan (lambda (val) (make-list k val)) lst))
 
 (display "P15: [functional] (repli '(a b c) 3)\n")
 (display (repli '(a b c) 3)) (newline) (newline)
 
-;; P16 (**) Drop every N'th element from a list.
+;; P16 (**) Drop every n'th element from a list.
 ; Example:
 ; * (drop '(a b c d e f g h i k) 3)
 ; (a b d e g h k)
 
-(define (drop lst k)
-  (define (drop-tail lst k i dropped)
+(define (drop lst n)
+  (define (drop-tail lst n i dropped)
     (cond
      ((null? lst) dropped)
-     ((equal? i 1) (drop-tail (cdr lst) k k dropped))
-     (else (drop-tail (cdr lst) k (- i 1) (cons (car lst) dropped)))))
-  (reverse (drop-tail lst k k '())))
+     ((equal? i 1) (drop-tail (cdr lst) n n dropped))
+     (else (drop-tail (cdr lst) n (- i 1) (cons (car lst) dropped)))))
+  (reverse (drop-tail lst n n '())))
 
 (display "P16: (drop '(a b c d e f g h i k) 3)\n")
 (display (drop '(a b c d e f g h i k) 3)) (newline) (newline)
@@ -340,26 +349,41 @@
 ; * (split '(a b c d e f g h i k) 3)
 ; ((a b c) (d e f g h i k))
 
-
 (define (split lst k)
   (define (split-tail start end k)
     (cond
      ((equal? k 0) (list (reverse start) end))
-     (else (split-tail (cons (car end) start) (cdr end))))))
+     (else (split-tail (cons (car end) start) (cdr end) (- k 1)))))
+  (split-tail '() lst k))
 
 (display "P17: (split '(a b c d e f g h i k) 3)\n")
-(display (split '(a b c d e f g h i k) 3))
+(display (split '(a b c d e f g h i k) 3)) (newline) (newline)
 
 ;; P18 (**) Extract a slice from a list.
-;; Given two indices, I and K, the slice is the list containing the elements between the I'th and K'th element of the original list (both limits included). Start counting the elements with 1.
+; Given two indices, i and k, the slice is the list containing the elements between the i'th and k'th element of the original list (both limits included). Start counting the elements with 1.
+; Example:
+; * (slice '(a b c d e f g h i k) 3 7)
+; (c d e f g)
 
-;; Example:
-;; * (slice '(a b c d e f g h i k) 3 7)
-;; (C D E F G)
-;; P19 (**) Rotate a list N places to the left.
-;; Examples:
-;; * (rotate '(a b c d e f g h) 3)
-;; (D E F G H A B C)
+(define (slice lst i k)
+  (define (slice-tail lst i k sliced)
+    (cond
+     ((equal? k 1) (reverse sliced))
+     ((equal? i 1) (slice-tail (cdr lst) i (- k 1) (cons (car lst) sliced)))
+     (else (slice-tail (cdr lst) (- i 1) (- k 1) sliced))))
+  (slice-tail lst i k '()))
+
+(display "P18: (slice '(a b c d e f g h i k) 3 7)\n")
+(display (slice '(a b c d e f g h i k) 3 7)) (newline) (newline)
+
+;; P19 (**) Rotate a list n places to the left.
+; Examples:
+; * (rotate '(a b c d e f g h) 3)
+; (d e f g h a b c)
+
+(define (rotate lst n) (mapcan (lambda (x) x) (reverse (split lst n))))
+(display "(rotate '(a b c d e f g h) 3)\n")
+(display (rotate '(a b c d e f g h) 3)) (newline) (newline)
 
 ;; * (rotate '(a b c d e f g h) -2)
 ;; (G H A B C D E F)
