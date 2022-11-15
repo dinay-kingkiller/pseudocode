@@ -365,6 +365,11 @@
 ; * (slice '(a b c d e f g h i k) 3 7)
 ; (c d e f g)
 
+(define (slice lst i k) (cadr (split (car (split lst (- k 1))) (- i 1))))
+
+(display "P18: (slice '(a b c d e f g h i k) 3 7)\n")
+(display (slice '(a b c d e f g h i k) 3 7)) (newline) (newline)
+
 (define (slice lst i k)
   (define (slice-tail lst i k sliced)
     (cond
@@ -373,79 +378,129 @@
      (else (slice-tail (cdr lst) (- i 1) (- k 1) sliced))))
   (slice-tail lst i k '()))
 
-(display "P18: (slice '(a b c d e f g h i k) 3 7)\n")
+(display "P18: [recursive] (slice '(a b c d e f g h i k) 3 7)\n")
 (display (slice '(a b c d e f g h i k) 3 7)) (newline) (newline)
 
 ;; P19 (**) Rotate a list n places to the left.
 ; Examples:
 ; * (rotate '(a b c d e f g h) 3)
 ; (d e f g h a b c)
+; * (rotate '(a b c d e f g h) -2)
+; (g h a b c d e f)
+; Hint: Use the predefined functions length and append, as well as the result of problem P17.
 
-(define (rotate lst n) (mapcan (lambda (x) x) (reverse (split lst n))))
-(display "(rotate '(a b c d e f g h) 3)\n")
+(define (rotate lst n)
+  (let ((result (split lst (modulo n (length lst))))) (append (cadr result) (car result))))
+
+(display "P19: (rotate '(a b c d e f g h) 3)\n")
 (display (rotate '(a b c d e f g h) 3)) (newline) (newline)
+(display "P19: (rotate '(a b c d e f g h) -2)\n")
+(display (rotate '(a b c d e f g h) -2)) (newline) (newline)
 
-;; * (rotate '(a b c d e f g h) -2)
-;; (G H A B C D E F)
+;; P20 (*) Remove the k'th element from a list.
+; Example:
+; * (remove-at '(a b c d) 2)
+; (a c d)
 
-;; Hint: Use the predefined functions length and append, as well as the result of problem P17.
-;; P20 (*) Remove the K'th element from a list.
-;; Example:
-;; * (remove-at '(a b c d) 2)
-;; (A C D)
+(define (remove-at lst k)
+  (let ((result (split lst (- k 1)))) (append (car result) (cdadr result))))
+
+(display "P20: (remove-at '(a b c d) 2)\n")
+(display (remove-at '(a b c d) 2)) (newline) (newline)
+
 ;; P21 (*) Insert an element at a given position into a list.
-;; Example:
-;; * (insert-at 'alfa '(a b c d) 2)
-;; (A ALFA B C D)
+; Example:
+; * (insert-at 'alfa '(a b c d) 2)
+; (a alfa b c d)
+
+(define (insert-at ele lst k)
+  (let ((result (split lst (- k 1)))) (append (car result) (cons ele (cadr result)))))
+
+(display "P21: (insert-at 'alfa '(a b c d) 2)\n")
+(display (insert-at 'alfa '(a b c d) 2)) (newline) (newline)
+
 ;; P22 (*) Create a list containing all integers within a given range.
-;; If first argument is smaller than second, produce a list in decreasing order.
-;; Example:
-;; * (range 4 9)
-;; (4 5 6 7 8 9)
+; If first argument is smaller than second, produce a list in decreasing order.
+; Example:
+; * (range 4 9)
+; (4 5 6 7 8 9)
+
+(define (range i j)
+  (cond
+   ((> j i) (cons i (range (+ i 1) j)))
+   ((< j i) (cons i (range (- i 1) j)))
+   (else (list i))))
+
+(display "P22: (range 4 9)\n")
+(display (range 4 9)) (newline) (newline)
+(display "P22: (range 9 4)\n")
+(display (range 9 4)) (newline) (newline)
+
 ;; P23 (**) Extract a given number of randomly selected elements from a list.
-;; The selected items shall be returned in a list.
-;; Example:
-;; * (rnd-select '(a b c d e f g h) 3)
-;; (E D A)
+; The selected items shall be returned in a list.
+; Example:
+; * (rnd-select '(a b c d e f g h) 3)
+; (e d a)
+; Hint: Use the built-in random number generator and the result of problem P20.
 
-;; Hint: Use the built-in random number generator and the result of problem P20.
-;; P24 (*) Lotto: Draw N different random numbers from the set 1..M.
-;; The selected numbers shall be returned in a list.
-;; Example:
-;; * (lotto-select 6 49)
-;; (23 1 17 33 21 37)
+(define (rnd-select lst k)
+  (if (= k 0) '()
+      (let ((result (+ (random (length lst)) 1)))
+	(cons (element-at lst result)
+	      (rnd-select (remove-at lst result) (- k 1))))))
 
-;; Hint: Combine the solutions of problems P22 and P23.
+(display "P23:  (rnd-select '(a b c d e f g h) 3)\n")
+(display (rnd-select '(a b c d e f g h) 3)) (newline) (newline)
+
+;; P24 (*) Lotto: Draw n different random numbers from the set 1..m.
+; The selected numbers shall be returned in a list.
+; Example:
+; * (lotto-select 6 49)
+; (23 1 17 33 21 37)
+; Hint: Combine the solutions of problems P22 and P23.
+
+(define (lotto-select n m) (rnd-select (range 1 m) n))
+
+(display "P24: (lotto-select 6 49)\n")
+(display (lotto-select 6 49)) (newline) (newline)
+
 ;; P25 (*) Generate a random permutation of the elements of a list.
-;; Example:
-;; * (rnd-permu '(a b c d e f))
-;; (B A D C E F)
+; Example:
+; * (rnd-permu '(a b c d e f))
+; (b a d c e f)
+; Hint: Use the solution of problem P23.
 
-;; Hint: Use the solution of problem P23.
+(define (rnd-permu lst) (rnd-select lst (length lst)))
+
+(display "P25: (rnd-permu '(a b c d e f))\n")
+(display (rnd-permu '(a b c d e f))) (newline) (newline)
+
 ;; P26 (**) Generate the combinations of K distinct objects chosen from the N elements of a list
-;; In how many ways can a committee of 3 be chosen from a group of 12 people? We all know that there are C(12,3) = 220 possibilities (C(N,K) denotes the well-known binomial coefficients). For pure mathematicians, this result may be great. But we want to really generate all the possibilities in a list.
+; In how many ways can a committee of 3 be chosen from a group of 12 people? We all know that there are C(12,3) = 220 possibilities (C(N,K) denotes the well-known binomial coefficients). For pure mathematicians, this result may be great. But we want to really generate all the possibilities in a list.
+; Example:
+; * (combination 3 '(a b c d e f))
+; ((a b c) (a b d) (a b e) ... )
 
-;; Example:
-;; * (combination 3 '(a b c d e f))
-;; ((A B C) (A B D) (A B E) ... )
+(define (combination n lst)
+  (define (combo-tail n lst combos)
+    (cond
+     ((equal? n 0) combos)
+     ((null? lst) '())
+	
 ;; P27 (**) Group the elements of a set into disjoint subsets.
-;; a) In how many ways can a group of 9 people work in 3 disjoint subgroups of 2, 3 and 4 persons? Write a function that generates all the possibilities and returns them in a list.
+; a) In how many ways can a group of 9 people work in 3 disjoint subgroups of 2, 3 and 4 persons? Write a function that generates all the possibilities and returns them in a list.
+; Example:
+; * (group3 '(aldo beat carla david evi flip gary hugo ida))
+; ( ( (ALDO BEAT) (CARLA DAVID EVI) (FLIP GARY HUGO IDA) )
+; ... )
+; b) Generalize the above function in a way that we can specify a list of group sizes and the function will return a list of groups.
+; Example:
+; * (group '(aldo beat carla david evi flip gary hugo ida) '(2 2 5))
+; ( ( (ALDO BEAT) (CARLA DAVID) (EVI FLIP GARY HUGO IDA) )
+; ... )
+; Note that we do not want permutations of the group members; i.e. ((ALDO BEAT) ...) is the same solution as ((BEAT ALDO) ...). However, we make a difference between ((ALDO BEAT) (CARLA DAVID) ...) and ((CARLA DAVID) (ALDO BEAT) ...).
+; You may find more about this combinatorial problem in a good book on discrete mathematics under the term "multinomial coefficients".
 
-;; Example:
-;; * (group3 '(aldo beat carla david evi flip gary hugo ida))
-;; ( ( (ALDO BEAT) (CARLA DAVID EVI) (FLIP GARY HUGO IDA) )
-;; ... )
-
-;; b) Generalize the above function in a way that we can specify a list of group sizes and the function will return a list of groups.
-
-;; Example:
-;; * (group '(aldo beat carla david evi flip gary hugo ida) '(2 2 5))
-;; ( ( (ALDO BEAT) (CARLA DAVID) (EVI FLIP GARY HUGO IDA) )
-;; ... )
-
-;; Note that we do not want permutations of the group members; i.e. ((ALDO BEAT) ...) is the same solution as ((BEAT ALDO) ...). However, we make a difference between ((ALDO BEAT) (CARLA DAVID) ...) and ((CARLA DAVID) (ALDO BEAT) ...).
-
-;; You may find more about this combinatorial problem in a good book on discrete mathematics under the term "multinomial coefficients".
 ;; P28 (**) Sorting a list of lists according to length of sublists
 ;; a) We suppose that a list contains elements that are lists themselves. The objective is to sort the elements of this list according to their length. E.g. short lists first, longer lists later, or vice versa.
 
