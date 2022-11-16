@@ -332,6 +332,8 @@
 ; * (drop '(a b c d e f g h i k) 3)
 ; (a b d e g h k)
 
+; tail recursive solution
+
 (define (drop lst n)
   (define (drop-tail lst n i dropped)
     (cond
@@ -340,7 +342,17 @@
      (else (drop-tail (cdr lst) n (- i 1) (cons (car lst) dropped)))))
   (reverse (drop-tail lst n n '())))
 
-(display "P16: (drop '(a b c d e f g h i k) 3)\n")
+(display "P16: [recursive] (drop '(a b c d e f g h i k) 3)\n")
+(display (drop '(a b c d e f g h i k) 3)) (newline) (newline)
+
+; functional solution
+
+(define (drop lst n)
+  (map (lambda (x) (cadr x))
+       (filter (lambda (x) (not (equal? (modulo (+ 1 (car x)) n) 0))) 
+	       (zip (iota (length lst)) lst))))
+
+(display "P16: [functional] (drop '(a b c d e f g h i k) 3)\n")
 (display (drop '(a b c d e f g h i k) 3)) (newline) (newline)
 
 ;; P17 (*) Split a list into two parts; the length of the first part is given.
@@ -365,15 +377,18 @@
 ; * (slice '(a b c d e f g h i k) 3 7)
 ; (c d e f g)
 
-(define (slice lst i k) (cadr (split (car (split lst (- k 1))) (- i 1))))
+(define (slice lst i k) (cadr (split (car (split lst k)) (- i 1))))
 
 (display "P18: (slice '(a b c d e f g h i k) 3 7)\n")
 (display (slice '(a b c d e f g h i k) 3 7)) (newline) (newline)
 
 (define (slice lst i k)
   (define (slice-tail lst i k sliced)
+;    (display i) (newline)
+;    (display k) (newline)
+;    (display lst) (newline)
     (cond
-     ((equal? k 1) (reverse sliced))
+     ((equal? k 0) (reverse sliced))
      ((equal? i 1) (slice-tail (cdr lst) i (- k 1) (cons (car lst) sliced)))
      (else (slice-tail (cdr lst) (- i 1) (- k 1) sliced))))
   (slice-tail lst i k '()))
@@ -390,7 +405,7 @@
 ; Hint: Use the predefined functions length and append, as well as the result of problem P17.
 
 (define (rotate lst n)
-  (let ((result (split lst (modulo n (length lst))))) (append (cadr result) (car result))))
+  (reduce-right (lambda (x y) (append y x)) '() (split lst (modulo n (length lst)))))
 
 (display "P19: (rotate '(a b c d e f g h) 3)\n")
 (display (rotate '(a b c d e f g h) 3)) (newline) (newline)
@@ -403,8 +418,8 @@
 ; (a c d)
 
 (define (remove-at lst k)
-  (let ((result (split lst (- k 1)))) (append (car result) (cdadr result))))
-
+  (append (slice lst 1 (- k 1)) (cdr (slice lst k (length lst)))))
+  
 (display "P20: (remove-at '(a b c d) 2)\n")
 (display (remove-at '(a b c d) 2)) (newline) (newline)
 
@@ -414,8 +429,8 @@
 ; (a alfa b c d)
 
 (define (insert-at ele lst k)
-  (let ((result (split lst (- k 1)))) (append (car result) (cons ele (cadr result)))))
-
+  (append (slice lst 1 (- k 1)) (cons ele (slice lst k (length lst)))))
+  
 (display "P21: (insert-at 'alfa '(a b c d) 2)\n")
 (display (insert-at 'alfa '(a b c d) 2)) (newline) (newline)
 
@@ -433,8 +448,6 @@
 
 (display "P22: (range 4 9)\n")
 (display (range 4 9)) (newline) (newline)
-(display "P22: (range 9 4)\n")
-(display (range 9 4)) (newline) (newline)
 
 ;; P23 (**) Extract a given number of randomly selected elements from a list.
 ; The selected items shall be returned in a list.
@@ -443,15 +456,24 @@
 ; (e d a)
 ; Hint: Use the built-in random number generator and the result of problem P20.
 
+
 (define (rnd-select lst k)
   (if (= k 0) '()
       (let ((result (+ (random (length lst)) 1)))
 	(cons (element-at lst result)
 	      (rnd-select (remove-at lst result) (- k 1))))))
 
-(display "P23:  (rnd-select '(a b c d e f g h) 3)\n")
+(display "P23: (rnd-select '(a b c d e f g h) 3)\n")
 (display (rnd-select '(a b c d e f g h) 3)) (newline) (newline)
 
+
+(define (rnd-select lst k)
+  (map (lambda (x) (list-ref lst  (+ (random (- (length lst) x)) x)))
+       (iota k)))
+
+(display "P23: (rnd-select '(a b c d e f g h) 3)\n")
+(display (rnd-select '(a b c d e f g h) 3)) (newline) (newline)
+       
 ;; P24 (*) Lotto: Draw n different random numbers from the set 1..m.
 ; The selected numbers shall be returned in a list.
 ; Example:
@@ -482,13 +504,13 @@
 ; ((a b c) (a b d) (a b e) ... )
 
 (define (combination n lst)
-    (cond
-        ((= n 0) (list '()))
-        ((null? (cdr lst)) (list (list (car lst))))
-        (else (filter (lambda (x) (equal? n (length x)))
-                      (append (map (lambda (x): (cons (car lst) x))
-                                   (combination (- n 1) (cdr lst)))
-                               (combination n (cdr lst)))))))
+  (cond
+   ((= n 0) (list '()))
+   ((null? (cdr lst)) (list (list (car lst))))
+   (else (filter (lambda (x) (equal? n (length x)))
+		 (append (map (lambda (x) (cons (car lst) x))
+			      (combination (- n 1) (cdr lst)))
+			 (combination n (cdr lst)))))))
 
 (display "P26: (combination 3 '(a b c d e f))\n")
 (display (combination 3 '(a b c d e f))) (newline) (newline)
