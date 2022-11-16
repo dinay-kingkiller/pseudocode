@@ -482,11 +482,16 @@
 ; ((a b c) (a b d) (a b e) ... )
 
 (define (combination n lst)
-  (define (combo-tail n lst combos)
     (cond
-     ((equal? n 0) combos)
-     ((null? lst) '())
-	
+        ((null? lst) '())
+        ((= n 0) (list '()))
+        (else (append
+                  (map (lambda (x): (cons (car lst) x)) (combination (- n 1) (cdr lst)))
+                  (combination n (cdr lst))))))
+
+(display "P26: (combination 3 '(a b c d e f))\n")
+(display (combination 3 '(a b c d e f))) (newline) (newline)
+
 ;; P27 (**) Group the elements of a set into disjoint subsets.
 ; a) In how many ways can a group of 9 people work in 3 disjoint subgroups of 2, 3 and 4 persons? Write a function that generates all the possibilities and returns them in a list.
 ; Example:
