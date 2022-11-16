@@ -483,11 +483,12 @@
 
 (define (combination n lst)
     (cond
-        ((null? lst) '())
         ((= n 0) (list '()))
-        (else (append
-                  (map (lambda (x): (cons (car lst) x)) (combination (- n 1) (cdr lst)))
-                  (combination n (cdr lst))))))
+        ((null? (cdr lst)) (list (list (car lst))))
+        (else (filter (lambda (x) (equal? n (length x)))
+                      (append (map (lambda (x): (cons (car lst) x))
+                                   (combination (- n 1) (cdr lst)))
+                               (combination n (cdr lst)))))))
 
 (display "P26: (combination 3 '(a b c d e f))\n")
 (display (combination 3 '(a b c d e f))) (newline) (newline)
