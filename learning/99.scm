@@ -1,4 +1,4 @@
-;;; Working with Lists
+;; Working with Lists
 (newline) (newline)
 
 ;; P01 (*) Find the last box of a list.
@@ -456,24 +456,15 @@
 ; (e d a)
 ; Hint: Use the built-in random number generator and the result of problem P20.
 
-
 (define (rnd-select lst k)
-  (if (= k 0) '()
-      (let ((result (+ (random (length lst)) 1)))
-	(cons (element-at lst result)
-	      (rnd-select (remove-at lst result) (- k 1))))))
+  (if (equal? k 0) '()
+      ((lambda (x)
+	 (cons (element-at lst x) (rnd-select (remove-at lst x) (- k 1))))
+       (+ (random (length lst)) 1))))
 
 (display "P23: (rnd-select '(a b c d e f g h) 3)\n")
 (display (rnd-select '(a b c d e f g h) 3)) (newline) (newline)
 
-
-(define (rnd-select lst k)
-  (map (lambda (x) (list-ref lst  (+ (random (- (length lst) x)) x)))
-       (iota k)))
-
-(display "P23: (rnd-select '(a b c d e f g h) 3)\n")
-(display (rnd-select '(a b c d e f g h) 3)) (newline) (newline)
-       
 ;; P24 (*) Lotto: Draw n different random numbers from the set 1..m.
 ; The selected numbers shall be returned in a list.
 ; Example:
@@ -508,7 +499,7 @@
    ((= n 0) (list '()))
    ((null? (cdr lst)) (list (list (car lst))))
    (else (filter (lambda (x) (equal? n (length x)))
-		 (append (map (lambda (x) (cons (car lst) x))
+		 (append (map (lambda (y) (cons (car lst) y))
 			      (combination (- n 1) (cdr lst)))
 			 (combination n (cdr lst)))))))
 
@@ -519,15 +510,36 @@
 ; a) In how many ways can a group of 9 people work in 3 disjoint subgroups of 2, 3 and 4 persons? Write a function that generates all the possibilities and returns them in a list.
 ; Example:
 ; * (group3 '(aldo beat carla david evi flip gary hugo ida))
-; ( ( (ALDO BEAT) (CARLA DAVID EVI) (FLIP GARY HUGO IDA) )
+; ( ( (aldo beat) (carla david evi) (flip gary hugo ida) )
 ; ... )
 ; b) Generalize the above function in a way that we can specify a list of group sizes and the function will return a list of groups.
 ; Example:
 ; * (group '(aldo beat carla david evi flip gary hugo ida) '(2 2 5))
-; ( ( (ALDO BEAT) (CARLA DAVID) (EVI FLIP GARY HUGO IDA) )
+; ( ( (aldo beat) (carla david) (evi flip gary hugo ida) )
 ; ... )
-; Note that we do not want permutations of the group members; i.e. ((ALDO BEAT) ...) is the same solution as ((BEAT ALDO) ...). However, we make a difference between ((ALDO BEAT) (CARLA DAVID) ...) and ((CARLA DAVID) (ALDO BEAT) ...).
+; Note that we do not want permutations of the group members; i.e. ((aldo beat) ...) is the same solution as ((beat aldo) ...). However, we make a difference between ((aldo beat) (carla david) ...) and ((carla david) (aldo beat) ...).
 ; You may find more about this combinatorial problem in a good book on discrete mathematics under the term "multinomial coefficients".
+
+(define (permutation lst)
+  (if
+   (null? lst) (list '())
+   (reduce-left append '()
+		(map (lambda (x)
+		       (map (lambda (y)
+			      (cons (list-ref lst x) y))
+			    (permutation (remove-at lst (+ x 1)))))
+		     (iota (length lst))))))
+
+(display "(permutation '(a b c))\n")
+(display (permutation '(a b c))) (newline) (newline)
+
+(define (group3 lst)
+  (map
+   (lambda (x) (list (sublist lst 0 2) (sublist lst 2 5) (sublist lst 5 9)))
+   (permutation lst)))
+  
+(display "P27a: (group3 '(aldo beat carla david evi flip gary hugo ida))\n")
+; (display (group3 '(aldo beat carla david evi flip gary hugo ida))) (newline) (newline)
 
 ;; P28 (**) Sorting a list of lists according to length of sublists
 ;; a) We suppose that a list contains elements that are lists themselves. The objective is to sort the elements of this list according to their length. E.g. short lists first, longer lists later, or vice versa.
