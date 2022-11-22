@@ -533,13 +533,74 @@
 (display "(permutation '(a b c))\n")
 (display (permutation '(a b c))) (newline) (newline)
 
+; (define (group3 lst)
+;   (map
+;    (lambda (x) (list (sublist lst 0 2) (sublist lst 2 5) (sublist lst 5 9)))
+;    (permutation lst)))
+
 (define (group3 lst)
-  (map
-   (lambda (x) (list (sublist lst 0 2) (sublist lst 2 5) (sublist lst 5 9)))
-   (permutation lst)))
-  
+  (define (group3-tail lst)
+    (cond
+     ((null? lst) 
+  (map (lambda (x)
+	 (cons x (map (lambda (y)
+			(cons y)) (combination 2 lst)      
+
+(define (group3 lst)
+  (cond
+   ((> (length lst) 7)
+    (group 2  
+   ((> (length lst) 4))
+   (else (list (list '() '() lst)))))))
+
+    
+    (append (map (lambda x) (cons (car lst) x) (group3 (cdr lst))
+    (define (combination n lst)
+  (cond
+   ((= n 0) (list '()))
+   ((null? (cdr lst)) (list (list (car lst))))
+   (else (filter (lambda (x) (equal? n (length x)))
+		 (append (map (lambda (y) (cons (car lst) y))
+			      (combination (- n 1) (cdr lst)))
+			 (combination n (cdr lst)))))))
+
+   (else )
+   ((equal? (length lst) 0) (list '()))
+   ((equal? (length lst) 4))
+   ((equal? (length lst) 7))
+   (else 
+   ((null? (cdr lst)) (list (list (car lst))))
+   (else (filter (lambda (x) (equal? n (length x)))
+		 (append (map (lambda (y) (cons (car lst) y))
+			      (combination (- n 1) (cdr lst)))
+			 (combination n (cdr lst)))))))
+
 (display "P27a: (group3 '(aldo beat carla david evi flip gary hugo ida))\n")
 ; (display (group3 '(aldo beat carla david evi flip gary hugo ida))) (newline) (newline)
+
+(define (combo n lst)
+  (cond
+   ((= n 0) (list (list '() lst)))
+   ((= n (length lst)) (list (list lst '())))
+   (else
+    (map (lambda (x)
+	   (append
+	    (cons (cons (car lst) (car x)) (cdr x))
+	    (combo
+
+	    (combo (- n 1) (cdr lst))))
+  
+
+(define (group lst size)
+  (define (group-help lst size left)
+  (cond
+   ((null? size) '());;fix
+   ((equal? (car size) 0) (group lst (cdr size)))
+   (else
+    (map (lambda (x) (cons (car lst) x)
+
+(display "(group '(aldo beat carla david evi flip gary hugo ida) '(2 2 5))\n")
+(display (group '(aldo beat carla david evi flip gary hugo ida) '(2 2 5)))
 
 ;; P28 (**) Sorting a list of lists according to length of sublists
 ;; a) We suppose that a list contains elements that are lists themselves. The objective is to sort the elements of this list according to their length. E.g. short lists first, longer lists later, or vice versa.
