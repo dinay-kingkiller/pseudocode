@@ -535,20 +535,34 @@
 
 (define (my-combination n lst)
   (cond
-   ((= n 0) (list (list '() lst)))
    ((= n (length lst)) (list (list lst '())))
+   ((= n 0) (list (list '() lst))) 
    (else (append
 	  (map (lambda (x) (list (cons (car lst) (car x)) (cadr x))) (my-combination (- n 1) (cdr lst)))
 	  (map (lambda (x) (list (car x) (cons (car lst) (cadr x)))) (my-combination n (cdr lst)))))))
 
-(display "(my-combination 3 '(a b c d e f))\n")
-(display (my-combination 3 '(a b c d e f))) (newline) (newline)
+(display "(my-combination 3 '(a b c d e))\n")
+(display (my-combination 3 '(a b c d e))) (newline)  (newline)
+
 
 (define (group3 lst)
-  (map (lambda (y) (map (lambda (z) (car z)) (my-combination 4 "")
-  
+  (reduce-left append '() (map (lambda (x) (map (lambda (y) (cons (car x) y)) (my-combination 3 (cadr x)))) (my-combination 2 lst))))
+
 (display "P27a: (group3 '(aldo beat carla david evi flip gary hugo ida))\n")
-; (display (group3 '(aldo beat carla david evi flip gary hugo ida))) (newline) (newline)
+(display "Too Long to Display\n\n")
+;; (display (group3 '(aldo beat carla david evi flip gary hugo ida))) (newline) (newline)
+
+(define (group lst size)
+  (cond
+   ((null? size) (list (list '())))
+   ((null? (cdr size)) (map car (my-combination (car size) lst)))
+   (else
+    (map (lambda (y) (cons (car y) (cdr y))) (map (lambda (x) (cons (car x) (group (cadr x) (cdr size)))) (my-combination (car size) lst))))))
+
+(display "P27b: (group '(aldo beat carla david evi flip gary hugo ida) '(2 2 5))\n")
+;; (display "Too Long to Display\n\n")
+(display (group '(aldo beat carla) '(1 1 1))) (newline) (newline)
+
 
 ;; P28 (**) Sorting a list of lists according to length of sublists
 ;; a) We suppose that a list contains elements that are lists themselves. The objective is to sort the elements of this list according to their length. E.g. short lists first, longer lists later, or vice versa.
