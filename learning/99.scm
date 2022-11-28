@@ -520,19 +520,6 @@
 ; Note that we do not want permutations of the group members; i.e. ((aldo beat) ...) is the same solution as ((beat aldo) ...). However, we make a difference between ((aldo beat) (carla david) ...) and ((carla david) (aldo beat) ...).
 ; You may find more about this combinatorial problem in a good book on discrete mathematics under the term "multinomial coefficients".
 
-(define (permutation lst)
-  (if
-   (null? lst) (list '())
-   (reduce-left append '()
-		(map (lambda (x)
-		       (map (lambda (y)
-			      (cons (list-ref lst x) y))
-			    (permutation (remove-at lst (+ x 1)))))
-		     (iota (length lst))))))
-
-;; (display "(permutation '(a b c))\n")
-;; (display (permutation '(a b c))) (newline) (newline)
-
 (define (my-combination n lst)
   (cond
    ((= n (length lst)) (list (list lst '())))
@@ -541,8 +528,8 @@
 	  (map (lambda (x) (list (cons (car lst) (car x)) (cadr x))) (my-combination (- n 1) (cdr lst)))
 	  (map (lambda (x) (list (car x) (cons (car lst) (cadr x)))) (my-combination n (cdr lst)))))))
 
-(display "(my-combination 3 '(a b c d e))\n")
-(display (my-combination 3 '(a b c d e))) (newline)  (newline)
+;; (display "(my-combination 3 '(a b c d e))\n")
+;; (display (my-combination 3 '(a b c d e))) (newline)  (newline)
 
 
 (define (group3 lst)
@@ -555,34 +542,67 @@
 (define (group lst size)
   (cond
    ((null? size) (list (list '())))
-   ((null? (cdr size)) (map car (my-combination (car size) lst)))
+   ((null? (cdr size)) (list (map car (my-combination (car size) lst))))
    (else
-    (map (lambda (y) (cons (car y) (cdr y))) (map (lambda (x) (cons (car x) (group (cadr x) (cdr size)))) (my-combination (car size) lst))))))
+    (map (lambda (y) (cons (car y) (cadr y))) (map (lambda (x) (cons (car x) (group (cadr x) (cdr size)))) (my-combination (car size) lst))))))
 
 (display "P27b: (group '(aldo beat carla david evi flip gary hugo ida) '(2 2 5))\n")
-;; (display "Too Long to Display\n\n")
-(display (group '(aldo beat carla) '(1 1 1))) (newline) (newline)
-
+(display (group '(aldo beat carla david evi flip gary hugo ida) '(2 2 5))) (newline) (newline)
 
 ;; P28 (**) Sorting a list of lists according to length of sublists
 ;; a) We suppose that a list contains elements that are lists themselves. The objective is to sort the elements of this list according to their length. E.g. short lists first, longer lists later, or vice versa.
-
-;; Example:
-;; * (lsort '((a b c) (d e) (f g h) (d e) (i j k l) (m n) (o)))
-;; ((O) (D E) (D E) (M N) (A B C) (F G H) (I J K L))
-
+; Example:
+; * (lsort '((a b c) (d e) (f g h) (d e) (i j k l) (m n) (o)))
+; ((o) (d e) (d e) (m n) (a b c) (f g h) (i j k l))
 ;; b) Again, we suppose that a list contains elements that are lists themselves. But this time the objective is to sort the elements of this list according to their length frequency; i.e., in the default, where sorting is done ascendingly, lists with rare lengths are placed first, others with a more frequent length come later.
+; Example:
+; * (lfsort '((a b c) (d e) (f g h) (d e) (i j k l) (m n) (o)))
+; ((i j k l) (o) (a b c) (f g h) (d e) (d e) (m n))
+; Note that in the above example, the first two lists in the result have length 4 and 1, both lengths appear just once. The third and forth list have length 3 which appears twice (there are two list of this length). And finally, the last three lists have length 2. This is the most frequent length.
 
-;; Example:
-;; * (lfsort '((a b c) (d e) (f g h) (d e) (i j k l) (m n) (o)))
-;; ((I J K L) (O) (A B C) (F G H) (D E) (D E) (M N))
+(define (all-but-last lst) (reverse (cdr (reverse lst))))
 
-;; Note that in the above example, the first two lists in the result have length 4 and 1, both lengths appear just once. The third and forth list have length 3 which appears twice (there are two list of this length). And finally, the last three lists have length 2. This is the most frequent length.
-;; Arithmetic
+;; pull (null? unsorted) out of tail call
+(define (my-bubble-sort keys values)
+  (define (bubble-tail unsorted values sorted sorted?)
+    (cond
+     ((null? unsorted)
+      (if sorted? (reverse sorted) (bubble-tail (reverse sorted) values '() #t)))
+     ((null? (cdr unsorted))
+      (bubble-tail (cdr unsorted) values (cons (car unsorted) sorted) sorted?))
+     ((< (values (car unsorted)) (values (cadr unsorted)))
+      (bubble-tail (cons (car unsorted) (cddr unsorted)) values (cons (cadr unsorted) sorted) #f))
+     (else
+      (bubble-tail (cdr unsorted) values (cons (car unsorted) sorted) sorted?))))
+  (bubble-tail keys values '() #t))
+
+(define (my-heap-sort keys values) #t)
+(define (my-insert-sort keys values) #t)
+(define (my-merge-sort keys values) #t)
+(define (my-quick-sort keys values)
+  (define (quick-tail current left right pivot values)
+    (cond
+     ((null? (cdr current)) (append
+			     (quick-tail (reverse (cdr left)) '() '() (first left) values)
+			     current
+			     (quick-tail (all-but-last right) '() '() (last right) values)))
+     ((> pivot (car 
+  (if (null? keys) '()
+      (quick-tail (all-but-last keys) '() '() (last keys) values)
+(define (my-select-sort keys values) #t)
+(define (my-shell-sort keys values) #t)
+
+(define (lsort lst) (my-bubble-sort lst length))
+
+(display "P28: (lsort '((a b c) (d e) (f g h) (d e) (i j k l) (m n) (o)))\n")
+(display (lsort '((a b c) (d e) (f g h) (d e) (i j k l) (m n) (o)))) (newline) (newline)
+
+;;; Arithmetic
 ;; P31 (**) Determine whether a given integer number is prime.
-;; Example:
-;; * (is-prime 7)
-;; T
+; Example:
+; * (is-prime 7)
+; #t
+
 ;; P32 (**) Determine the greatest common divisor of two positive integer numbers.
 ;; Use Euclid's algorithm.
 ;; Example:
