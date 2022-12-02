@@ -560,64 +560,9 @@
 ; ((i j k l) (o) (a b c) (f g h) (d e) (d e) (m n))
 ; Note that in the above example, the first two lists in the result have length 4 and 1, both lengths appear just once. The third and forth list have length 3 which appears twice (there are two list of this length). And finally, the last three lists have length 2. This is the most frequent length.
 
-(define (my-bubble-sort lst fun)
-  (define (bubble-tail unsorted sorted sorted?)
-    (cond
-     ((null? unsorted)
-      (if sorted? sorted (bubble-tail (reverse sorted) '() #t)))
-     ((null? (cdr unsorted))
-      (bubble-tail (cdr unsorted) (cons (car unsorted) sorted) sorted?))
-     ((< (fun (car unsorted)) (fun (cadr unsorted)))
-      (bubble-tail (cons (car unsorted) (cddr unsorted)) (cons (cadr unsorted) sorted) #f))
-     (else
-      (bubble-tail (cdr unsorted) (cons (car unsorted) sorted) sorted?))))
-  (bubble-tail lst '() #t))
 
-(display "(my-bubble-sort '(3 7 8 5 2 1 9 5 4) values)\n")
-(display (my-bubble-sort '(3 7 8 5 2 1 9 5 4) values)) (newline) (newline)
+(define (lsort lst) (sort lst (lambda (x y) (> (length x) (length y)))))
 
-(define (my-heap-sort lst fun) #t)
-(define (my-insert-sort lst fun) #t)
-(define (my-merge-sort lst fun)
-  (define (split lst lst1 lst2)
-    (cond
-     ((null? lst) (list lst1 lst2))
-     ((null? (cdr lst)) (list (cons (car lst) lst1) lst2))
-     (else (split (cddr lst) (cons (car lst) lst1) (cons (cadr lst) lst2)))))
-  (cond
-   ((null? lst) '())
-   (else (map (lambda (x) (split x '() '())) (split lst '() '())))))
-
-(define (my-pivot-sort lst fun)
-  (define (pivot-tail current left right)
-    (cond
-     ((null? current) '())
-     ((null? (cdr current))
-      (append (pivot-tail left '() '()) current (pivot-tail right '() '())))
-     ((< (fun (car current)) (fun (cadr current)))
-      (pivot-tail (cons (car current) (cddr current)) left (cons (cadr current) right)))
-     (else
-      (pivot-tail (cons (car current) (cddr current)) (cons (cadr current) left) right))))
-  (pivot-tail lst '() '()))
-
-(display "(my-pivot-sort '(3 7 8 5 2 1 9 5 4) values)\n")
-(display (my-pivot-sort '(3 7 8 5 2 1 9 5 4) values)) (newline) (newline)
-
-(define (my-select-sort lst fun)
-  (define (select-tail checked unchecked sorted lowest)
-    (cond
-     ((null? unchecked)
-      (if (null? checked)
-	  (cons lowest sorted)
-	  (select-tail '() (cdr checked) (cons lowest sorted) (car checked))))
-     ((> lowest (car unchecked)) (select-tail (cons lowest checked) (cdr unchecked) sorted (car unchecked)))
-     (else (select-tail (cons (car unchecked) checked) (cdr unchecked) sorted lowest))))
-  (if (null? lst) '() (reverse (select-tail '() (cdr lst) '() (car lst)))))
-
-(display "(my-select-sort '(3 7 8 5 2 1 9 5 4) values)\n")
-(display (my-select-sort '(3 7 8 5 2 1 9 5 4) values)) (newline) (newline)
-
-(define (lsort lst) (reverse (my-pivot-sort lst length)))
 (display "P28: (lsort '((a b c) (d e) (f g h) (d e) (i j k l) (m n) (o)))\n")
 (display (lsort '((a b c) (d e) (f g h) (d e) (i j k l) (m n) (o)))) (newline) (newline)
 
