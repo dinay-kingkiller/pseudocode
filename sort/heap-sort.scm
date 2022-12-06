@@ -1,5 +1,0 @@
-(letrec ((my-heap-sort (lambda (unsorted compare?) #t)))
-  (newline)
-  (display "(my-heap-sort '(3 7 8 5 2 1 9 5 4) <)\n")
-  (display (my-heap-sort '(3 7 8 5 2 1 9 5 4) <))
-  (newline))
