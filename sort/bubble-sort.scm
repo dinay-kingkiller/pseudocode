@@ -1,21 +1,25 @@
-(letrec ((bubble-tail
-          (lambda (unsorted compare? sorted swap?)
-            ; compare? is a lambda expression that evaluates true if a value should be before another.   
-            ; swap? is true if a change to the order has happened during the last pass.                  
-            (cond
-             ((null? unsorted)
-              ; if two values have been swapped restart otherwise return sorted                          
-	      (if swap? sorted (bubble-tail (reverse sorted) compare? '() #t)))
-             ((null? (cdr unsorted))
-              (bubble-tail (cdr unsorted) compare? (cons (car unsorted) sorted) swap?))
-             ((compare? (car unsorted) (cadr unsorted)) ; this isn't clear                               
-	      (bubble-tail
-	       (cons (car unsorted) (cddr unsorted))
-	       compare?
-	       (cons (cadr unsorted) sorted) #f))
-             (else ; else if the current value is in the correct position                                
-	      (bubble-tail (cdr unsorted) compare? (cons (car unsorted) sorted) swap?)))))
-         (bubble-sort (lambda (unsorted compare?) (bubble-tail unsorted compare? '() #t))))
+(letrec
+    ((bubble-tail
+      (lambda (unsorted sorted bubble compare? swap? reversed?)
+        ; reversed? is used to bubble from both sides of the linked list
+	(cond
+	 ((null? unsorted) ; Has it finished a pass?
+	  (cond
+	   (swap? ; Has there been a swap in the last pass?
+	    (bubble-tail sorted '() bubble (lambda (x y) (compare? y x)) #t (not reversed?)))
+	   (reversed?
+	    (reverse (cons bubble sorted)))
+	   (else
+	    (cons bubble sorted))))
+	 ((null? sorted) ; Push bubble to sorted if its at the beginning of a pass
+	  (bubble-tail (cdr unsorted) (list bubble) (car unsorted) compare? #f reversed?))
+	 ((compare? bubble (car unsorted))
+	  (bubble-tail (cdr unsorted) (cons (car unsorted) sorted) bubble compare? #t reversed?))
+	 (else ; If the current value is in the correct position                                
+	  (bubble-tail (cdr unsorted) (cons bubble sorted) (car unsorted) compare? swap? reversed?)))))
+     (bubble-sort
+      (lambda (unsorted compare?)
+	(if (null? unsorted) '() (bubble-tail (cdr unsorted) '() (car unsorted) compare? #f #f)))))
   (newline)
   (display "(bubble-sort '(3 7 8 5 2 1 9 5 4) <)\n")
   (display (bubble-sort '(3 7 8 5 2 1 9 5 4) <))
