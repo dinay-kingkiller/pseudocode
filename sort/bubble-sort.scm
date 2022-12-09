@@ -11,11 +11,11 @@
 	    (reverse (cons bubble sorted)))
 	   (else
 	    (cons bubble sorted))))
-	 ((null? sorted) ; Push bubble to sorted if its at the beginning of a pass
+	 ((null? sorted) ; Push bubble to sorted if it's at the beginning of a pass.
 	  (bubble-tail (cdr unsorted) (list bubble) (car unsorted) compare? #f reversed?))
 	 ((compare? bubble (car unsorted))
 	  (bubble-tail (cdr unsorted) (cons (car unsorted) sorted) bubble compare? #t reversed?))
-	 (else ; If the current value is in the correct position                                
+	 (else ; Is current value in the correct position?
 	  (bubble-tail (cdr unsorted) (cons bubble sorted) (car unsorted) compare? swap? reversed?)))))
      (bubble-sort
       (lambda (unsorted compare?)
