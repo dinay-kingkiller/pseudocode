@@ -1,130 +1,102 @@
-from collections.abc import MutableMapping
-class MinHeap(MutableMapping):
-    """
-    A MinHeap Binary Tree Queue implementation, or a dictionary ordered by value.
-    """
-
-    def __init__(self, *args, **kwargs):
-        self.
-        super().__init__(mapping)
-	self.queue = self.keys()
-        self.indices = {}
-    def __delitem__(self, key):
-        super().__delitem__(self, key)
-        last_key = self.queue[-1]
-        self.swap(key, last)
-        next_key = self.queue.pop()
-        parent_key = self.parent(last_key)
-        if self[last_key] > self[parent_key]:
-            self._upheap(last)
-        else:
-            self._downheap(last)
-        return next
-    def __getitem__(self, key):
-        if key in self:
-            return self._values[key]
-        else:
-            return self.__missing__(key)
-    def __iter__(self):
-        return self
-    def __len__(self):
-        return len(self._queue)
-    def __missing__(self, key):
-        return float('inf')
+from collections.abc import Collection, Iterator, Reversible
+class Heap(Collection, Iterator):
+    @classmethod
+    def sort(cls, iterable, key=None, reverse=False):
+        return list(Heap(iterable, key, reverse))
+    def __init__(self, iterable, key=None, reverse=False):
+        self.key = lambda x: x if key is None else key
+        self.reverse = reverse
+        self.queue = list(iterable)
+        for i, _ in reversed(list(enumerate(self.queue))):
+            """
+            Transversing in reverse order allows the ability to skip
+            leaf nodes without calculating the index of that final node.
+            """
+            self.downheap(i)
     def __bool__(self):
-	return self._queue()
+        return bool(self.queue)
+    def __contains__(self, value):
+        return value in self.queue
+    def __len__(self):
+        return len(self.queue)
     def __next__(self):
-        if self:
-            return self.extract()
+        if self.queue:
+            return self.pop()
         else:
             raise StopIteration
-    def __repr__(self):
-        extracted_repr = ', '.join([repr(val)+': '+repr(self._values[val]) for val in self._extracted])
-        queue_repr = ', '.join([repr(val)+': '+repr(self._values[val]) for val in self._queue])
-        return '{'+extracted_repr+'| '+queue_repr+'}'
-    def __setitem__(self, key, value):
-        if key not in self:
-            self.insert(key, value)
-        elif self._values[key] > value:
-            self.decrease_value(key, value)
-        elif self._values[key] < value:
-            self.increase_value(key, value)
-        else:
-            pass
-    def __str__(self):
-        return '{'+', '.join([str(val)+': '+str(self._values[val]) for val in self._extracted])+'}'
-    def decrease_value(self, key, value):
-        if key not in self:
-            self.insert(key, value)
-        elif self._values[key] > value:
-            self._values[key] = value
-            self._upheap(key)
-    def increase_value(self, key, value):
-        if key not in self:
-            self.insert(key, value)
-        elif self._values[key] > value:
-            self._values[key] = value
-            self._downheap(key)
-    def insert(self, key, value):
-        self._queue.append(key)
-        self._values[key] = value
-        self._indices[key] = len(self) - 1
-        self._upheap(key)
-    def delete(self, key):
-        last
+    def cmp(self, x, y):
+        """
+        self.cmp(x, y) compares two items by value in queue.
 
-    def __getitem__(self, key):
-        if key in self: = self._queue[-1]
-        self._swap(key, last)
-        next = self._queue.pop()
-	parent = self.get_parent(last)
-        if self._values[last] > self._values[parent]:
-            self._upheap(last)
+        If [x, y] should be [y, x], it returns False. Otherwise it returns True
+        """
+        if self.reverse:
+            return self.key(x) >= self.key(y)
         else:
-            self._downheap(last)
-        return next
-    def extract(self):
-        first = self._queue[0]
-        last = self._queue[-1]
-        self._swap(first, last)
-        next = self._queue.pop()
-        self._extracted.append(next)
-        self._downheap(last)
-        return next
-    def _swap(self, first, other):
-        first_index = self._indices[first]
-        other_index = self._indices[other]
-        self._queue[first_index] = other
-        self._queue[other_index] = first
-        self._indices[first] = other_index
-        self._indices[other] = first_index
-    def _upheap(self, key):
-        parent = self.get_parent(key)
-        if self._values[key] < self._values[parent]:
-            self._swap(key, parent)
-            self._upheap(key)
-    def _downheap(self, key):
-        left = self.get_left_child(key)
-        right = self.get_right_child(key)
-        child = left if self._values[left] > self._values[right] else right
-        if self._values[key] > self._values[child]:
-            self._swap(key, child)
-            self._downheap(key)
-    def get_parent(self, key):
-        parent_index = (self._indices[key]-1) // 2
-        if parent_index > 0:
-            return self._queue[parent_index]
+            return self.key(x) <= self.key(y)
+    def clear(self):
+        self.queue.clear()
+    def peek(self):
+        return self.queue[0]
+    def pop(self):
+        if len(self) == 1:
+            return self.queue.pop()
         else:
-            return key
-    def get_left_child(self, key):
-        child_index = (2*self._indices[key]) + 1
-        if child_index < len(self):
-            return self._queue[child_index]
+            next_item = self.queue[0]
+            self.queue[0] = self.queue.pop()
+            self.downheap(0)
+            return next_item
+    def push(self, value):
+        """
+        self.push adds the new value to the queue. The queue is then updated to maintain the heap property
+        """
+        self.queue.append(value)
+        self.upheap(len(self))
+    def pushpop(self, value):
+        if len(self) == 0:
+            return value
+        elif self.cmp(value, self.queue[0]):
+            return value
         else:
-            return key
-    def get_right_child(self, key):
-        child_index = (2*self._indices[key]) + 1
-        if child_index < len(self):
-            return self._queue[child_index]
+            next_item = self.queue[0]
+            self.queue[0] = value
+            downheap(0)
+            return next_item
+    def poppush(self, value):
+        next_item = self.queue[0]
+        self.queue[0] = value
+        return next_item
+    def downheap(self, index):
+        while 2*index + 1 < len(self):
+            if len(self) <= 2*index + 2:
+                child = 2*index + 1
+            elif self.cmp(self.queue[2*index+2], self.queue[2*index+1]):
+                child = 2*index + 2
+            else:
+                child = 2*index + 1
+            if self.cmp(self.queue[index], self.queue[child]):
+                break
+            else:
+                temp = self.queue[child]
+                self.queue[child] = self.queue[index]
+                self.queue[index] = temp
+                index = child
+    def upheap(self, index):
+        while index != 0:
+            parent = (index-1) // 2
+            if self.cmp(self.queue[index], self.queue[parent]):
+                break
+            else:
+                temp = self.queue[parent]
+                self.queue[parent] = self.queue[index]
+                self.queue[index] = temp
+                index = parent
+    def to_tree(self, index):
+        if 2*index + 2 < len(self):
+            return [self.queue[index], self.to_tree(2*index + 1), self.to_tree(2*index + 2)]
+        if 2*index + 1 < len(self):
+            return [self.queue[index], self.to_tree(2*index + 1)]
         else:
-            return key
+            return [self.queue[index]]
+if __name__=="__main__":
+    print(Heap.sort([3, 7, 8, 5, 2, 1, 9, 5, 4]))
