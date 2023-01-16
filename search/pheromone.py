@@ -40,7 +40,7 @@ def search(start, goal, moves, distance, distance_power=1, pheromones_power=0, e
                 # Reward ants who reach the goal.
                 tour_length = sum(distance(move) for move in tour[ant])
                 for edge in path:
-                    pheromone[edge] += reward_power / tour_length[ant]
+                    pheromones[edge] += reward_power / tour_length[ant]
                 # But also make them start again.
                 location[ant] = start
                 tour = [start]
