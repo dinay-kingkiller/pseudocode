@@ -100,28 +100,35 @@ from string import ascii_lowercase as alphabet
 from itertools import product
 import json
 rarest_word = "murky"
+
+
 def json_reader(filename):
-    with open("targets.json",'r') as file:
-        data=json.loads(file.read())
+    with open("targets.json", 'r') as file:
+        data = json.loads(file.read())
     return data
+
+
 class Solver:
     def __init__(self, possible_words, guess_words, word_length=5, difficulty=0):
-        self.possible_words=possible_words
-        self.guess_words=guess_words
-        self.word_length=word_length
-        self.difficulty=difficulty
+        self.possible_words = possible_words
+        self.guess_words = guess_words
+        self.word_length = word_length
+        self.difficulty = difficulty
+
     def next_guess(self):
         if not self.guess_words:
-           return None
+            return None
         max_score = 0
         for word in self.guess_words:
-            score=self.score(word)
-            if score>max_score:
+            score = self.score(word)
+            if score > max_score:
                 best_word = word
                 max_score = score
         return best_word
+
     def initial_guess(self):
         pass
+
     def score(self, word):
         score = 0
         for position, letter in enumerate(word):
@@ -132,12 +139,14 @@ class Solver:
             score += exact_score * absent_score
             score += elsewhere_score * absent_score
         return score
+
     def update_guess(self):
         pass
+
     def update_frequency(self):
-        self.exact = {letter:[0]*self.word_length for letter in alphabet}
-        self.elsewhere = {letter:[0]*self.word_length for letter in alphabet}
-        self.present = {letter:0 for letter in alphabet}
+        self.exact = {letter: [0]*self.word_length for letter in alphabet}
+        self.elsewhere = {letter: [0]*self.word_length for letter in alphabet}
+        self.present = {letter: 0 for letter in alphabet}
         list_length = 0
         for word in self.possible_words:
             list_length += 1
@@ -145,35 +154,41 @@ class Solver:
                 try:
                     self.exact[letter][position] += 1
                 except IndexError:
-                    print("Extra Long Word at:",word)
+                    print("Extra Long Word at:", word)
                     raise
                 if letter not in word[position+1:]:
                     self.present[letter] += 1
                 for other_position, other_letter in enumerate(word):
-                    if letter!=other_letter:
+                    if letter != other_letter:
                         self.elsewhere[letter][other_position] += 1
-        self.absent = {letter:list_length-self.present[letter] for letter in alphabet}
+        self.absent = {letter: list_length -
+                       self.present[letter] for letter in alphabet}
         return self.exact, self.elsewhere, self.absent
+
     def use_clues(self, exact_clue, elsewhere_clue, absent_clue):
         for word in self.valid_list:
-            self.validate_possible(word, exact_clue, elsewhere_clue, absent_clue)
+            self.validate_possible(
+                word, exact_clue, elsewhere_clue, absent_clue)
         for word in self.guess_words:
-            if self.difficulty==0:
+            if self.difficulty == 0:
                 pass
-            elif self.difficulty==1:
-                self.validate_hard(word, exact_clue, elsewhere_clue, absent_clue)
-            elif self.difficulty==2:
-                self.validate_ultra(word, exact_clue, elsewhere_clue, absent_clue)
+            elif self.difficulty == 1:
+                self.validate_hard(
+                    word, exact_clue, elsewhere_clue, absent_clue)
+            elif self.difficulty == 2:
+                self.validate_ultra(
+                    word, exact_clue, elsewhere_clue, absent_clue)
             else:
                 raise ValueError
         self.update_frequency()
+
     def validate_possible(self, word, exact_clue, elsewhere_clue, absent_clue):
         for position, letter in exact_clue:
-            if word[position]!=letter:
+            if word[position] != letter:
                 self.possible_words.remove(word)
                 return
         for position, letter in elsewhere_clue:
-            if word[position]==letter:
+            if word[position] == letter:
                 self.possible_words.remove(word)
                 return
             elif letter not in word:
@@ -185,8 +200,10 @@ class Solver:
             if letter in word:
                 self.guess_words.remove(word)
                 return
+
     def validate_normal(self, word, exact_clue, elsewhere_clue, absent_clue):
         pass
+
     def validate_hard(self, word, exact_clue, elsewhere_clue, absent_clue):
         present = set(i for _, i in elsewhere_clue)
         for letter in present:
@@ -194,16 +211,17 @@ class Solver:
                 self.guess_words.remove(word)
                 return
         for position, letter in exact_clue:
-            if word[position]!=letter:
+            if word[position] != letter:
                 self.guess_words.remove(word)
                 return
+
     def validate_ultra(self, word, exact_clue, elsewhere_clue, absent_clue):
         for position, letter in exact_clue:
-            if word[position]!=letter:
+            if word[position] != letter:
                 self.guess_words.remove(word)
                 return
         for position, letter in elsewhere_clue:
-            if word[position]==letter:
+            if word[position] == letter:
                 self.guess_words.remove(word)
                 return
             elif letter not in word:
@@ -215,53 +233,67 @@ class Solver:
             if letter in word:
                 self.guess_words.remove(word)
                 return
+
+
 def initial_filter(word_list, word_length):
-    word_list = filter(lambda x: len(x)==word_length and x!='*'*word_length, word_list)
+    word_list = filter(lambda x: len(
+        x) == word_length and x != '*'*word_length, word_list)
     return word_list
+
+
 def pattern2key(pattern):
     return sum([value*2**index for index, value in enumerate(pattern)])
+
+
 def key2pattern(key):
-    index=0
-    pattern=[]
+    index = 0
+    pattern = []
     while key:
-        pattern.append(key%2==1)
-        key=key//2
-        index+=1
+        pattern.append(key % 2 == 1)
+        key = key//2
+        index += 1
     return pattern
+
+
 def calculate_frequency(word_list):
     assert word_list
     word_length = word_list[0]
-    frequency = {letter:[0]*2**word_length for letter in alphabet}
-    present = {letter:0 for letter in alphabet}
+    frequency = {letter: [0]*2**word_length for letter in alphabet}
+    present = {letter: 0 for letter in alphabet}
     list_length = 0
     for word in word_list:
         list_length += 1
         for index, letter in enumerate(word):
             assert index < word_length
             if letter not in word[index+1:]:
-                pattern = [letter==other_letter for other_letter in word]
+                pattern = [letter == other_letter for other_letter in word]
                 key = pattern2key(pattern)
                 present[letter] += 1
                 frequency[letter][key] += 1
-    absent = {letter:list_length-present[letter] for letter in alphabet}
+    absent = {letter: list_length-present[letter] for letter in alphabet}
     for letter in alphabet:
         frequency[letter][0] = absent[letter]
     return frequency
+
+
 def get_possibilities(word, letter):
-    pattern = [ltr==letter for ltr in word]
+    pattern = [ltr == letter for ltr in word]
     count = sum(pattern)
-    short_possiblities = product(["absent","elsewhere","exact"],repeat=count)
+    short_possiblities = product(
+        ["absent", "elsewhere", "exact"], repeat=count)
     possiblities = {}
     for short_possibility in short_possiblities:
         short_index = 0
         for pattern_index, pattern_bool in enumerate(pattern):
             if pattern_bool:
-                assert pattern_index>=short_index
+                assert pattern_index >= short_index
                 possiblities[pattern_index] = short_possiblities[short_index]
                 short_index += 1
             else:
                 possiblities[pattern_index] = "unknown"
     return possiblities
+
+
 def compare_patterns(target, guess):
     """
     [T, F, F], [T, F, F]
@@ -275,36 +307,39 @@ def compare_patterns(target, guess):
     for index, value in enumerate(target):
         if not value:
             compared[index] = "unknown"
-        elif value==guess[index]:
+        elif value == guess[index]:
             compared[index] = "exact"
         for guess_index, guess_value in enumerate(guess):
-            if target[guess_index]=value and target[guess_index]!=guess_value:
+            if target[guess_index] = value and target[guess_index] != guess_value:
                 compared[index] = "elsewhere"
                 break
         else:
             compared[index] = "absent"
-    return compared   
+    return compared
+
 
 def calculate_score(guess, guess_frequency):
     score = 0
     for word_index, letter in enumerate(guess):
         if letter not in word[guess+1:]:
-            pattern = [ltr==letter for ltr in word]
+            pattern = [ltr == letter for ltr in word]
             """
             guess_pattern[letter] = [T F F T F]
             patterns=target_frequency[letter]
             for pattern in patterns:
                 
             """
-            for 
-            guess_pattern=compare_guess(guess, pattern)
-            guess_key=guess2key(guess_pattern)
+            for
+            guess_pattern = compare_guess(guess, pattern)
+            guess_key = guess2key(guess_pattern)
             if guess_key in probability:
-                probability[guess_key]+=frequency[pattern]
+                probability[guess_key] += frequency[pattern]
             else:
-                probability[guess_key]=frequency[pattern]
-        for 
+                probability[guess_key] = frequency[pattern]
+        for
     return score
+
+
 """
 patterns can be: (1 or 0)^3
 000
@@ -324,31 +359,38 @@ patterns can be: (1 or 0)^3
 110
 111
 """
-from itertools import product
+
+
 def compare(target, guess):
-    assert len(target)==len(guess)
-    length=len(guess)
-    clue=['<'+str(char)+'>' for char in guess]
+    assert len(target) == len(guess)
+    length = len(guess)
+    clue = ['<'+str(char)+'>' for char in guess]
     for index in range(length):
-        if target[index]==guess[index]:
-            clue[index]='['+str(guess[index])+']'
+        if target[index] == guess[index]:
+            clue[index] = '['+str(guess[index])+']'
         elif guess[index] in clue:
             for target_value, guess_value in zip(list(target), list(guess)):
-                if guess[index]==target_value and guess[index]!=guess_value:
-                    clue[index]='('+str(guess[index])+')'
+                if guess[index] == target_value and guess[index] != guess_value:
+                    clue[index] = '('+str(guess[index])+')'
                     break
         else:
-            clue[index]='{'+str(guess[index])+'}'
+            clue[index] = '{'+str(guess[index])+'}'
     return "".join(clue)
+
+
 def test_permutations(char_list, word_length):
-    combo_list=list(product(char_list,repeat=word_length))
-    return {target:{guess:compare(target, guess) for guess in combo_list} for target in combo_list}   
+    combo_list = list(product(char_list, repeat=word_length))
+    return {target: {guess: compare(target, guess) for guess in combo_list} for target in combo_list}
+
+
 def parse_guess(guess_string):
     pass
 
-if __name__=="__main__":
-    clues=test_permutations([0,1],3)
-    guesses={guess[target]:clues[target][guess] for guess in clues for target in clues}
+
+if __name__ == "__main__":
+    clues = test_permutations([0, 1], 3)
+    guesses = {guess[target]: clues[target][guess]
+               for guess in clues for target in clues}
     for target in clues:
         print("target: "+str(target))
         print(clues[target])

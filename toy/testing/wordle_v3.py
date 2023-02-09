@@ -10,7 +10,7 @@ def fun1(targets, dictionary):
             if letter not in present:
                 present[letter] = 0
             present[letter] += 1
-            pattern = [letter==other_letter for other_letter in word]
+            pattern = [letter == other_letter for other_letter in word]
             key = get_key2(pattern)
             if key in target_frequency:
                 target_frequency[letter][key] += 1
@@ -28,7 +28,8 @@ def fun1(targets, dictionary):
             compared_frequency = {}
             for pattern in target_frequency[letter]:
                 assert len(pattern) == word_length
-                guess_pattern = [letter==other_letter for other_letter in word]
+                guess_pattern = [
+                    letter == other_letter for other_letter in word]
                 target_pattern = list(pattern)
                 compared_pattern = ["unknown"] * word_length
                 for index in range(word_length):
@@ -58,6 +59,8 @@ def fun1(targets, dictionary):
             best_guess = word
             max_score = score
     return best_guess
+
+
 def fun2(targets, dictionary):
     best_guess = None
     max_score = 0

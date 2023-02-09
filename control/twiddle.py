@@ -1,4 +1,4 @@
-#twiddle.py
+# twiddle.py
 def twiddle(parameters, cost, tolerance=0.2):
     """ 
     This function generates a local set of best parameters from a cost function.
@@ -11,9 +11,9 @@ def twiddle(parameters, cost, tolerance=0.2):
     best_error = cost(parameters)
     upper_guess = parameters
     lower_guess = parameters
-    while sum(parameters_change) > tolerance: 
+    while sum(parameters_change) > tolerance:
         for count in len(parameters):
-            upper_guess[count] = parameters[count] + parameters_change[count] 
+            upper_guess[count] = parameters[count] + parameters_change[count]
             lower_guess[count] = parameters[count] - parameters_change[count]
             upper_error = cost(upper_guess)
             lower_error = cost(lower_guess)

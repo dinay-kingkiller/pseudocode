@@ -1,8 +1,8 @@
 def elect(ballot_box, valid_candidates):
     """
-    
+
     """
-    count = dict.fromkeys(valid_candidates, 0) 
+    count = dict.fromkeys(valid_candidates, 0)
     for ballot in ballot_box:
         # set any missing candidates to last place
         for candidate in valid_candidates:
@@ -12,7 +12,7 @@ def elect(ballot_box, valid_candidates):
         for candidate in valid_candidates:
             scores[ballot[candidate]] += [candidate]
         sorted_scores = sorted(scores, reverse=True)
-        
+
         candidate_count = 0
         for score in sorted_score:
             new_candidates = scores[score]

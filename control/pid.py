@@ -1,4 +1,4 @@
-#pid.py
+# pid.py
 """
 A PID is one of the most basic controllers for feedback control. Given an
 error signal, the controller will give you a signal that lets you reduce
@@ -21,6 +21,7 @@ while:
     process(update)
 """
 
+
 class pid:
     def __init__(self, P, I=0, D=0):
         self.P = P
@@ -28,6 +29,7 @@ class pid:
         self.D = D
         self.sumError = 0
         self.lastError = 0
+
     def update(self, error):
         self.sumError += error
         diffError = error - self.lastError

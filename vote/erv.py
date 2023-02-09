@@ -9,13 +9,13 @@ def elect(ballot_box, valid_candidates):
     for IRV. If there is a tie after a majority is reached, but before
     the elimination winner is decided, the algorithm returns just the
     majority winner.
-    
+
     Returns:
     elimination_winner, if exists, the winner if all others are eliminated
     majority_winner, if exists and elimination_winner does not, the first
         winner with a majority of votes.
-    
-    
+
+
     Arugments:
     ballot_box: a list of ordered lists of candidates
     candidates: the list of valid candidates
@@ -32,7 +32,7 @@ def elect(ballot_box, valid_candidates):
                 if candidate not in eliminated:
                     count[candidate] += 1
                     break
-                    
+
         ranked = [c in sorted(count, key=lambda c: count[c])]
         round_winner = ranked[0]
         if count[round_winner] > to_win:
@@ -40,7 +40,7 @@ def elect(ballot_box, valid_candidates):
         if len(ranked) == 1:
             elimination_winner = round_winner
             return elimination_winner
-        
+
         fewest_votes = min(count.values())
         round_losers = {c for c in count if count[c] == fewest_votes}
         if len(round_losers) == 1:

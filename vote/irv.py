@@ -1,14 +1,15 @@
 from collections import defaultdict
 
+
 def elect(ballot_box):
     """
     An algorithm for calculating the Instant-Runoff Vote (IRV) winner
     (also known as ranked-choice voting (RCV) in the United States or
     alternative vote (AV) in the United Kingdom).
-    
+
     Note: This algorithm uses "greedy elimination" to remove irrelevant
     ties.
-    
+
     Arugments:
     ballot_box: an iterable of ordered lists of candidates
     """
@@ -28,12 +29,12 @@ def elect(ballot_box):
             else:
                 # remove empty ballots
                 ballot_box.remove(ballot)
-        
+
         ranked_candidates = [c in sorted(count, key=lambda c: count[c])]
         round_winner = ranked[0]
         if len(ranked_candidates) == 1:
             return round_winner
-        
+
         for ranking, candidate in enumerate(ranked_candidates):
             # Greedy Elimination
             aggregate = sum([count[c] for c in ranked_candidates[ranking+1:]])
