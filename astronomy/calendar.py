@@ -1,25 +1,34 @@
+#!/usr/bin/env python3
+
+"""
+calendar.py
+
+This package converts Gregorian Dates to days from the Julian Epoch:
+-4712-01-01.5. It also can be used to calculate the number of days
+between two dates or just Gregorian leap days.
+"""
+
 from itertools import accumulate
-# Calendar
 
 
 def JulianDayfromGregorianDate(year, month, day):
     """
 
     """
-    # Fractional days are handled by leapday calculation.
+    # Fractional days are handled by leap day calculation.
     days_in_year = 365
+    months_in_year = 12
     # After transform, the year will end with February
     days_in_month = [31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 29]
-    months_in_year = len(days_in_month)
-    # [31, 61, 92, 122, 153, 184, 214, 245, 275, 306, 337, 366]
-    days_acc_this_month = list(accumulate(days_in_month))
-    # 1582-10-05 => 1582-08-05 after moving February
+    # accumulated: [31, 61, 92, 122, 153, 184, 214, 245, 275, 306, 337, 366]
+    days_accumulated = list(accumulate(days_in_month))
+    # 1582-10-05 becomes 1582-08-05 after moving February
     switch_year = 1582
     switch_day = 218
-    # -4712-01-01.5 => -4713-11-01.5 after moving February
+    # -4712-01-01.5 becomes -4713-11-01.5 after moving February
     epoch_year = -4713
     epoch_day = 307.5
-    epoch = epoch_day + epoch_year*days_in_year
+    julian_epoch = epoch_day + epoch_year*days_in_year
     # Clean up any 13+ month dates
     year = year + (month-1) // 12
     month = (month-1) % months_in_year + 1
@@ -29,31 +38,45 @@ def JulianDayfromGregorianDate(year, month, day):
         year -= 1
     else:
         month -= 2
-    ordinal_day = days_acc_this_month[month-2] + day
-    leapdays = LeapDaysGregorian(epoch_year, year)
-    # Add back the leapdays from Julian calendar from beginning of switch_year
+    # This line also cleans up very long months.
+    ordinal_day = days_accumulated[month-2] + day
+    leap_days = LeapDaysGregorian(epoch_year, year)
     if year == switch_year and ordinal_day <= switch_day:
-        leapdays += 10
-    return days_in_year*year + ordinal_day + leapdays - epoch
-
-
+        # Add back the leap days from Julian calendar from beginning of switch_year
+        leap_days += 10
+    return days_in_year*year + ordinal_day + leap_days - julian_epoch
 def LeapDaysSinceJulianEpoch(year):
     """
-    This function calculates the number of leap days since the Julian Epoch (0000-01-01) to the end of argument year (year-12-31) in in the (non-propeletic) Gregorian calendar. It should always return a positive number, so before the Julian epoch would be the number of leap days that will be added by the time of the epoch.
-
+    This function calculates the number of leap days since the Julian
+    Epoch (0000-01-01) to the end of argument year (year-12-31) in the
+    (non-propeletic) Gregorian calendar. It should always return a
+    positive number, so before the Julian epoch would be the number of
+    leap days that will be added by the time of the epoch.
+    
     Notes on the algorithm:
-    Using the propeletic Gregorian calendar removes 12 leap years (100, 200, 300, 500, 600, 700, 900, 1000, 1100, 1300, 1400, 1500), but only 10 days were removed in 1582 with the adoption of the Gregorian calendar (in the few places where the Gregorian calendar was adopted). This puts the normal integer division algorithm two days short of the actual calendar. 
-
-    The additional one leap day after each Epoch switch adds the leap day for year 0 (which of course wouldn't be added before the 0 epoch.)
-
-    Adding a one to the year makes sure you are not measuring the leap day that year (i.e. -0004 should not increment the leap day since we are measuring from -0004-12-31) 
+    Using the propeletic Gregorian calendar removes 12 leap years (100,
+    200, 300, 500, 600, 700, 900, 1000, 1100, 1300, 1400, 1500), but
+    only 10 days were removed in 1582 with the adoption of the Gregorian
+    calendar (in the few places where the Gregorian calendar was
+    adopted). This puts the normal integer division algorithm two days
+    short of the actual calendar. 
+    
+    The additional one leap day after each Epoch switch adds the leap
+    day for year 0 (which of course wouldn't be added before the Julian
+    epoch.)
+    
+    Adding a one to the year makes sure you are not measuring the leap
+    day that year (i.e. -0004 should not increment the leap day since we
+    are measuring from -0004-12-31) 
     """
-    GregorianEpoch = 1582  # Not a (traditional) leap year/not divisible by 4.
-    JulianEpoch = 0
-    if year >= GregorianEpoch:  # Epoch changed in October of GregorianEpoch
+    # 1582 is not a (traditional) leap year/not divisible by four.
+    gregorian_epoch = 1582
+    julian_epoch = 0
+    if year >= gregorian_epoch:
+        # Epoch changed in October of gregorian_epoch
         return year//4 - year//100 + year//400 + 3
-    # There is a leap day in JulianEpoch (0000-02-29)
-    elif year >= JulianEpoch:
+    elif year >= julian_epoch:
+        # There is a leap day in julian_epoch (0000-02-29)
         return year//4 + 1
     else:
         return abs(year+1) // 4
@@ -61,9 +84,11 @@ def LeapDaysSinceJulianEpoch(year):
 
 def LeapDaysGregorian(year1, year2):
     """
-    Calculates the number of leap days between two whole years year1-12-31 and year2-12-31 using the Gregorian calendar (which uses the Julian Calendar before 1582).
+    Calculates the number of leap days between two whole years
+    year1-12-31 and year2-12-31 using the Gregorian calendar (which uses
+    the Julian Calendar before 1582).
     """
-    if year1 ^ year2 >= 0:
+    if (year1 >= 0) == (year2 >= 0):
         return abs(LeapDaysSinceJulianEpoch(year1) - LeapDaysSinceJulianEpoch(year2))
     else:
         return LeapDaysSinceJulianEpoch(year1) + LeapDaysSinceJulianEpoch(year2)
@@ -114,11 +139,11 @@ if __name__ == "__main__":
                          0.0]
     greg_date_list = map(parse_isodate_string, almostisoformats)
     years, months, days = zip(*greg_date_list)
-    julian_day = list(map(JulianDayfromGregorianDate, years, months, days))
+    julian_day = map(JulianDayfromGregorianDate, years, months, days)
     err = [corr-calc for calc, corr in zip(julian_day, actual_julian_day)]
-    # print(*[str(z)+":"+x for x, y, z in zip(almostisoformats, julian_day, err)],sep="\n")
+    # print(*[str(z)+":"+x for x, y, z in zip(almostisoformats, julian_day, err)], sep="\n")
     # print("Leap Days:")
-    # print(*list(map(LeapDaysSinceJulianDateEpoch,years)))
+    # print(*list(map(LeapDaysSinceJulianDateEpoch, years)))
     # print("Values:")
     # print(*julian_day, sep="\n")
     print(LeapDaysGregorian(-4713, 1581))
@@ -126,4 +151,5 @@ if __name__ == "__main__":
     print(LeapDaysGregorian(-4713, 1583))
 
     print("Error in Values:")
-    print(*err, sep="\n")
+    for val in err:
+        print(val)
