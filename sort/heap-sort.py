@@ -1,65 +1,67 @@
-from collections.abc import Iterator
+"""
+@package heapsort
 
+An implementation of heap sort.
 
-class Heap(Iterator):
-    @classmethod
-    def sort(cls, iterable, key=None, reverse=False):
-        return list(Heap(iterable, key, reverse))
+@function heapsort(iterable=[], key=lambda x: x, reverse=False)
+A function with the same signature as the built-in sorted function using
+the heap sort method.
+"""
 
-    def __init__(self, iterable, key=None, reverse=False):
-        self.key = lambda x: x if key is None else key
-        self.reverse = reverse
-        self.queue = list(iterable)
-        for i, _ in reversed(list(enumerate(self.queue))):
-            """
-            Transversing in reverse order allows the ability to skip
-            leaf nodes without calculating the index of that final node.
-            """
-            self.downheap(i)
+def heapsort(iterable=[], key=lambda x: x, reverse=False):
+    """
+    A replacement for the built-in sorted function using the heap sort method.
 
-    def __next__(self):
-        if self.queue:
-            return self.pop()
+    Returns a sorted list
+    """
+    queue = list(iterable)
+
+    # Heapify queue.
+    for i in reversed(range(len(queue))):
+        queue = _downheap(i, queue, key, reverse)
+
+    # Sort queue.
+    sorted_list = [None] * len(queue)
+    for i in range(len(queue)):
+        sorted_list[i] = queue[0]
+        queue = _downheap(0, queue[-1:] + queue[1:-1], key, reverse)
+
+    return sorted_list
+
+def _downheap(i, heap, key, reverse):
+    """
+    Downheaps the i-th value of a heap.
+    """
+    parent = i
+    while parent < len(heap):
+        l_child = 2*parent + 1
+        r_child = 2*parent + 2
+        if l_child >= len(heap):
+            # The heap condition is satisfied if there are no children.
+            return heap
+        if r_child == len(heap):
+            # If there is no right child use left the left child.
+            child = l_child
         else:
-            raise StopIteration
-
-    def cmp(self, x, y):
-        """
-        self.cmp(x, y) compares two items by value in queue.
-
-        If [x, y] should be [y, x], it returns False. Otherwise it returns True
-        """
-        if self.reverse:
-            return self.key(x) >= self.key(y)
-        else:
-            return self.key(x) <= self.key(y)
-
-    def pop(self):
-        if len(self.queue) == 1:
-            return self.queue.pop()
-        else:
-            next_item = self.queue[0]
-            self.queue[0] = self.queue.pop()
-            self.downheap(0)
-            return next_item
-
-    def downheap(self, index):
-        while 2*index + 1 < len(self.queue):
-            if len(self.queue) <= 2*index + 2:
-                child = 2*index + 1
-            elif self.cmp(self.queue[2*index+2], self.queue[2*index+1]):
-                child = 2*index + 2
+            l_value = key(heap[l_child])
+            r_value = key(heap[r_child])
+            # Choose the child that will be the new parent of the other.
+            if not reverse:
+                child = l_child if l_value <= r_value else r_child
             else:
-                child = 2*index + 1
-            if self.cmp(self.queue[index], self.queue[child]):
-                break
-            else:
-                temp = self.queue[child]
-                self.queue[child] = self.queue[index]
-                self.queue[index] = temp
-                index = child
-
+                child = l_child if l_value >= r_value else r_child
+        c_value = key(heap[child])
+        p_value = key(heap[parent])
+        if not reverse and p_value <= c_value:
+            # The heap condition is satisfied.
+            return heap
+        elif reverse and p_value >= c_value:
+            # The heap condition is satisifed.
+            return heap
+        else:
+            heap[child], heap[parent] = heap[parent], heap[child]
+            parent = child
 
 if __name__ == "__main__":
-    print("\nHeap.sort([3, 7, 8, 5, 2, 1, 9, 5, 4])")
-    print(Heap.sort([3, 7, 8, 5, 2, 1, 9, 5, 4]), "\n")
+    print("heapsort([3, 7, 8, 5, 2, 1, 9, 5, 4])")
+    print(heapsort([3, 7, 8, 5, 2, 1, 9, 5, 4]))
