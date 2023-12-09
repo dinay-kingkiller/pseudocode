@@ -1,112 +1,151 @@
-# quaternion.py
-from operator import add, div, mul, neg, sub
+#!/usr/bin/python3
+"""
+Quaternion package to test the algebra of quaternions.
 
+Note: the definitions here use the same as ROS's tf package.
+"""
+
+import geometry_msgs.msg as gm
+from tf.transformations import *
+import sympy
 
 class quaternion:
+    """
+    quaternion(q=[0, 0, 0, 0]: list[4]) -> q[0]*i + q[1]*j + q[2]*k + q[3]
+        Default is the zero quaternion.
+    """
+    # Possible future signatures
+    # quaternion() -> returns the zero quaternion -> 0
+    # quaternion(real=s: number, imag=v: list[3]) -> v[0]*i + v[1]*j + v[2]*k + s
+    # quaternion(q: Quaternion) -> returns a copy of the quaternion
 
-    def __init__(self, data):
-        quaternion_length = 4
-        self._data = list(data)[0:quaternion_length]
-        self.index = 0
-
-    def __add__(self, other):
-        sum = map(add, self._data, other._data)
-        return quaternion(sum)
-
-    def __div__(self, other):
-        if isinstance(other, quaternion):
-            return self * other.conj() / other.normSqr()
-        else:
-            quot = [item / other for item in self]
-            return quaternion(quot)
-
-    def __getitem__(self, index):
-        return self._data[index]
+    def __init__(self, q=[1, 0, 0, 0]):
+        self.q = list(q)
 
     def __iter__(self):
-        return self
+        # i.e. for i in q: print(sympy.simplify(i))
+        return iter(self.q)
 
-    def __len__(self):
-        return len(self.data)
+    def __add__(self, other):
+        return quaternion([s + t for s, t in zip(self, other)])
 
     def __mul__(self, other):
-        prod0 = self[0] * other[0] - self[1] * other[1] - \
-            self[2] * other[2] - self[3] * other[3]
-        prod1 = self[0] * other[1] + self[1] * other[0] + \
-            self[2] * other[3] - self[3] * other[2]
-        prod2 = self[0] * other[2] + self[2] * other[0] + \
-            self[3] * other[1] - self[1] * other[3]
-        prod3 = self[0] * other[3] + self[3] * other[0] + \
-            self[1] * other[2] - self[2] * other[1]
-        prod = [prod0, prod1, prod2, prod3]
-        return quaternion(prod)
+        q = quaternion()
+        q.x = self[3]*other[0] + self[0]*other[3] + self[1]*other[2] - self[2]*other[1]
+        q.y = self[3]*other[1] - self[0]*other[2] + self[1]*other[3] + self[2]*other[0]
+        q.z = self[3]*other[2] + self[0]*other[1] - self[1]*other[0] + self[2]*other[3]
+        q.w = self[3]*other[3] - self[0]*other[0] - self[1]*other[1] - self[2]*other[2]
+        return q
 
     def __neg__(self):
-        opp = map(neg, self)
-        return quaternion(opp)
-
-    def __repr__(self):
-        return self.str_simp()
+        return Quaternion([-s for s in self.q])
 
     def __sub__(self, other):
-        diff = map(sub, self._data, other._data)
-        return quaternion(diff)
+        return quaternion([s - t for s, t in zip(self, other)])
+
+    def __getitem__(self, index):
+        return self.q[index]
+
+    def __setitem__(self, index, value):
+        self.q[index] = value
 
     def __str__(self):
-        return self.str_simp()
+        return str(self.q)
 
-    def __truediv__(self, other):
-        return self.__div__(other)
+    def conjugate(self):
+        """ Returns the quaternion conjugate. """
+        q = quaternion()
+        q.x = -self.x
+        q.y = -self.y
+        q.z = -self.z
+        q.w = self.w
+        return quaternion(q)
 
-    def conj(self):
-        conj0 = self[0]
-        conj1 = - self[1]
-        conj2 = - self[2]
-        conj3 = - self[3]
-        conj = [conj0, conj1, conj2, conj3]
-        return quaternion(conj)
+    def cross(self, other):
+        """ Returns the pure quaternion cross product. """
+        return (self.imag()*other.imag()).imag()
 
-    def copy(self):
-        return quaternion(self)
+    def dot(self, other):
+        """ Returns the pure quaternion dot product. """
+        return (self.imag()*other.imag()).real()
 
-    def inv(self):
-        return self.conjugate()
+    def imag(self):
+        """ Returns the imaginary part of the quaternion. """
+        q = quaternion()
+        q.x = self.x
+        q.y = self.y
+        q.z = self.z
+        q.w = 0
+        return q
 
-    def next(self):
-        try:
-            result = self._data[self.index]
-        except IndexError:
-            raise StopIteration
-        self.index += 1
-        return result
+    def quadrature(self):
+        """ Returns the square of the length. """
+        return sum(s*s for s in self)
 
-    def norm(self):
-        return sqrt(self.normSqr())
+    def real(self):
+        """ Returns the real part of the quaternion. """
+        q = quaternion()
+        q.w = self.w
+        return q
 
-    def normalize(self):
-        self = self / self.norm()
-
-    def normSqr(self):
-        sum = 0
-        for pt in self._data:
-            sum = sum + pt * pt
-        return sum
-
-    def str_simp(self):
-        return tuple(self._data).__str__()
+    def rotate(self, other):
+        """ Rotates (pure) quaternion by other. """
+        return other*self*other.conjugate()
 
     @property
-    def I(self):
-        return self.conjugate()
+    def x(self):
+        return self.q[0]
 
+    @property
+    def y(self):
+        return self.q[1]
+
+    @property
+    def z(self):
+        return self.q[2]
+
+    @property
+    def w(self):
+        return self.q[3]
+
+    @x.setter
+    def x(self, val):
+        self.q[0] = val
+
+    @y.setter
+    def y(self, val):
+        self.q[1] = val
+
+    @z.setter
+    def z(self, val):
+        self.q[2] = val
+
+    @w.setter
+    def w(self, val):
+        self.q[3] = val
 
 if __name__ == "__main__":
-    from sympy import symbols
-    q0, q1, q2, q3 = symbols('q0 q1 q2 q3')
-    q = quaternion([q0, q1, q2, q3])
-    print q
-    print - q
-    print q + q
-    print q - q
-    print q * q
-    print q /
+    qx, qy, qz, qw = sympy.symbols("q.x, q.y, q.z, q.w")
+    vx, vy, vz = sympy.symbols("v.x, v.y, v.z")
+    wx, wy, wz = sympy.symbols("w.x, w.y, w.z")
+    q = quaternion([qx, qy, qz, qw])
+    v = quaternion([vx, vy, vz, 0])
+    w = quaternion([wx, wy, wz, 0])
+
+    print("Rotation Matrix Derivation")
+    rotated = v.rotate(q)
+    for item in rotated:
+        print(sympy.collect(sympy.expand(sympy.simplify(item)), (vx, vy, vz)))
+
+    print("tf2 comparison (These should all be approx [0, 0, 0, 0])")
+    for i in range(10):
+        q1t = random_quaternion()
+        q2t = random_quaternion()
+        q1s = quaternion(q1t)
+        q2s = quaternion(q2t)
+        print(q1s*q2s - quaternion_multiply(q1t, q2t))
+
+    print("Fictious forces")
+    coriolis = w.cross(v.rotate(q)) # This isn't symplified
+    for item in coriolis:
+        print(sympy.collect(sympy.expand(sympy.simplify(item)), (wx, wy, wz)))
