@@ -572,6 +572,17 @@
 ; * (is-prime 7)
 ; #t
 
+(define (is-prime-naive num)
+  (define (is-prime-tail num div)
+    (cond
+     ((= div 1) #t)
+     ((= (modulo num div) 0) #f)
+     (else (is-prime-tail num (- div 1)))))
+  (is-prime-tail num (car (integer-divide num 2))))
+
+(display (is-prime-naive 7))
+
+
 ;; P32 (**) Determine the greatest common divisor of two positive integer numbers.
 ;; Use Euclid's algorithm.
 ;; Example:
